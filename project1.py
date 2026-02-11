@@ -27,24 +27,21 @@ person z: meek, needy lil' guy,
 
 #person1Questions = {"question":str : [["answer1": str, score: int/float], ["answer2", score2] ["answers3", score3]] <- example 
 person1 = {} #food guy
-
-
 person1keys = list(person1.keys) # this is for the quesiton indexes. This is so the questions and answers dont get mixed up
 
+person2 = {} #bully
+person2keys = list(person2.keys)
+
+person3 = {} #meek
+person3keys = list(person3.keys)
+numquestions = len(person1keys) + len(person2keys) + len(person3keys)
 #how to call
-# person1[person1keys[0]][2][1]  =  #question=idx > answer#=idx > score=1,answerstr=0
-person2 = {
-
-} #bully
-
-person3 = {
-
-} #meek
-
+# person1[person1keys[0]][2][1]  =  #question=idx (does not get the question itself) > answer#=idx > score=1,answerstr=0
+# person1keys[0] = #how to get the question itself
 
 MainScore = [] #idx+1 equals person number
 numofPeople = int(0)
-startval = 1
+startval = 1 #this changes the starting number in MainScore 
 
 #functions
 def ScoreAnswer(score):
@@ -58,18 +55,20 @@ def ScoreAnswer(score):
 
 
 
-def NextQuestion(scoremaybe, questionnumber):
-    
+def NextQuestion(score, questionNum):
+    question = ""
+    answers = []
+    return(question, answers)
 
 
-    return()
 
 
 def EndingGame():
     pass
 
 def StartGame():
-    numpeople = int(input("number of people: 1,2 or 3\n")) #sets number of people for game
+    print("   ---\nGame Setup\n   ---\n")
+    numpeople = int(input("number of friends: 1,2 or 3\n")) #sets number of people for game
     numofPeople = numpeople 
     for i in range(numofPeople):
         MainScore.append(int(startval))
@@ -90,23 +89,26 @@ def StartGame():
 
 
 def Tutorial():
-    return()
+    pass
 
 
 
 def Updatelog():
-    exit()
+    pass
     #next submission
 
 
 
 def MainFun():
     StartGame()
+    while numquestions > 0: #main loop for the game
+        curquestion, curanswers = NextQuestion()
+        print(f"{curquestion}\n")
+        for i in range(len(curanswers)):
+            print(curanswers[i])
+        print()
+        
 
-
-    
-    
-    return()
 
 
 
@@ -115,5 +117,5 @@ def MainFun():
 
 
 if __name__ == '__main__':
-# Write all functions in here that will be called when running the program
+    # Write all functions in here that will be called when running the program
     MainFun()
