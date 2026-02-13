@@ -2,6 +2,7 @@ import random
 import collections
 import math
 import tkinter
+from time import sleep
 
 """
 Docstring for project 1
@@ -25,7 +26,7 @@ person z: meek, needy lil' guy,
 
 #global variables
 
-#person1Questions = {"question": [["answer1", score], ["answer2", score2] ["answers3", score3]] <- example 
+#person1Questions = {"question": [["answer1", score, otherFriendEffects, checkpoint1], ["answer2", score2, otherFriendEffects2, checkpoint2] ["answers3", score3, otherFriendEffects3, checkpoint3]] <- example 
 person1 = {} #food guy
 person1keys = list(person1.keys()) # this is for the quesiton indexes. This is so the questions and answers dont get mixed up
 
@@ -61,7 +62,7 @@ def ScoreAnswer(answer, score):
 def NextQuestion(score, questionNum):
     question = ""
     answers = []
-    scorecard.append(answers(input()))
+ #   scorecard.append(answers(input()))
     return(question, answers)
 
 def friendsCnt(numpep, startvalue):
@@ -70,11 +71,11 @@ def friendsCnt(numpep, startvalue):
         try: #this is for input validation
             if startloop == "apples":
                 print("Default is set to 2 people. Difficulty scales on number of people. 1= Easy, 2= Medium, 3= Hard")
-                numpep = int(input(f"Enter number of friends: 1,2 or 3. Current value is: {numpep}\n->")) #sets number of people for game
+                numpep = int(input(f"Enter number of friends: 1,2 or 3. Current value is: {numpep}\n-> ")) #sets number of people for game
                 startloop = "pears" #first loop check, this will make it not happen again
             else:
                 numpep = int(input("-> "))                
-            peoplelist = [1,2,3]
+            peoplelist = [1,2,3] #only things that will be accepted
             if numpep not in peoplelist:
                 raise ValueError
             break
@@ -97,6 +98,22 @@ def nameSet(person_name):
             print("Name cannot be empty. Try again")
     return person_name
 
+def VictoryConditions(score):
+    Endgametype = 0
+    #victory condition '1' is out of quesitons
+    return Endgametype
+
+def ChoiceInput(answerlistlen):
+    while True:
+        try:
+            if answerlistlen == 0:
+                #work on this later
+            break    
+            else:
+                raise ValueError
+        except ValueError:
+            print("Name cannot be empty. Try again")
+    return person_name    
 
 def Updatelog():
     pass
@@ -161,9 +178,6 @@ def StartGame():
             print("Invalid input, please type exactly \"1\" or \"2\"")
     MainGame() #this goes into the main game
         #block was found in stackoverflow: https://stackoverflow.com/questions/41832613/python-input-validation-how-to-limit-user-input-to-a-specific-range-of-integers
-        
-
-    EndingGame()
 
 def Tutorial():
     Tut_text = """
@@ -188,27 +202,39 @@ def MainGame():
     numquestions = len(person1keys) + len(person2keys) + len(person3keys)
     score = 0
     questionnumber = 0
-    while numquestions > 0: #main loop for the game
+    VictoryCond = 0
+    while VictoryCond == 0: #main loop for the game
+        if numquestions == 0:
+            VictoryCond = 1 
+            break       
         curquestion, curanswers = NextQuestion(score, questionnumber)
         print(f"{curquestion}\n")
         for i in range(len(curanswers)):
             print(curanswers[i])
         print()
-        choice = input("Pick Answer 1, 2, or 3 by typing that number\n-> ")
+        choice = ChoiceInput(len(curanswers))
         CurAnswScore = ScoreAnswer(choice, curanswers[choice-1])
         score += CurAnswScore
         questionnumber += 1
-        numquestions -= 1 #this prevents endless loops
-    EndingGame()
-    
+        numquestions -= 1
+        VictoryCond = VictoryConditions(score)
+    EndingGame(VictoryCond)
 
-def EndingGame():
-    pass
+
+
+
+def EndingGame(victory):
+    print("Game end\n...\n...\n...") #placeholder for checking if this will be called
+    sleep(2)
+    exitgame = input("Do you want to play again or exit? \"Y\" for yes, anything else for no\n-> ")
+    if exitgame == "Y":
+        print("Thank you for playing")
+        exit()
 
 
 
 def Menuscreen(player_name=player_name): #unsure about the function input, this could be wrong
-    nonamechecknum = 3
+    nonamechecknum = 2
     numofPeople = 2
     global startval #this is bad form, ill try to fix this later. This was just an easy fix
     
@@ -241,6 +267,7 @@ def Menuscreen(player_name=player_name): #unsure about the function input, this 
                     if nonamechecknum == 0: #this is a funny easteregg
                         print("Fine, name has been set to 'Billybob'. You win")
                         player_name = "Billybob"
+                        sleep(2)
                         StartGame()
                     else:
                         print("Please set a name first")
