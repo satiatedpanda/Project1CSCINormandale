@@ -2,6 +2,7 @@ import random
 import collections
 import math
 import tkinter
+from time import sleep
 
 """
 Docstring for project 1
@@ -25,14 +26,26 @@ person z: meek, needy lil' guy,
 
 #global variables
 
-#person1Questions = {"question": [["answer1", score], ["answer2", score2] ["answers3", score3]] <- example 
-person1 = {} #food guy
+startval = 1 #this changes the starting number in MainScore. This is for us to tinker with to adjust difficulty/game length
+
+#person1Questions = {"question": [["answer1", score, checkpoint1, 'otherFriendEffects'], ["answer2", score2, checkpoint2, 'otherFriendEffects2'] ["answers3", score3, checkpoint3, 'otherFriendEffects3']] <- example 
+person1 = {} #Cameron - av Joe
 person1keys = list(person1.keys()) # this is for the quesiton indexes. This is so the questions and answers dont get mixed up
 
-person2 = {} #bully
+#DONT convert questions into an f-string. We format the name into it later.
+person2 = {"Dawn: {player_name}, I got a funny text from Cameron. He said you’re not\n going to the party tonight. I told him that was a pretty good joke but he\n says he’s serious, so how about you set the record straight for the both of us.": 
+           [["1) Ugh… He’s right?", 3], 
+            ["2) Okay first, you’re at an 11 when this should be a 4 conversation, and\n   second, yeah I’m staying in tonight.", 2], 
+            ["3) I’m just not really feeling it tonight.", 1]], 
+            "Dawn: Pretty sure the last time you hung out with all of us was at the beginning\nof the month. We all tried making breakfast with Cameron’s grandma’s prehistoric\nwaffle pan and it almost burned a hole in the counter.": 
+            [["1) That only happened because Cameron’s an idiot.", 2], 
+             ["2) Y’know, I think waffles are an acceptable reason to cause a house \"fire.\"", 1], 
+             ["3) That wasn’t our best idea.", 3]]
+             } #meek
+    #intended answer weights: 1 = high impact, 2 = light, 3 = medium
 person2keys = list(person2.keys())
 
-person3 = {} #meek
+person3 = {} #Sock - meek
 person3keys = list(person3.keys())
 
 #how to call
@@ -42,9 +55,6 @@ person3keys = list(person3.keys())
 MainScore = [] #idx+1 equals person number. will be in form [pers1, pers2,...,persX]
 scorecard = []
 
-#variables (should be worked on to make these inside functions, not global)
-player_name = ""
-startval = 1 #this changes the starting number in MainScore 
 
 
 
@@ -53,7 +63,7 @@ def ScoreAnswer(answer, score):
     result = 0
     result += sum(scorecard) #add scores to get result
     if result > 15: #placeholder value is 15 - median
-        MainScore.append(result) #this will cause errors, ill discuss this tommorow
+        pass
     else:
         pass
     return(result)
@@ -61,7 +71,10 @@ def ScoreAnswer(answer, score):
 def NextQuestion(score, questionNum):
     question = ""
     answers = []
-    scorecard.append(answers(input()))
+    question = question + str(person2keys[questionNum]) #temporarry
+    answers = person2[person2keys[questionNum]] #temporary
+
+
     return(question, answers)
 
 def friendsCnt(numpep, startvalue):
@@ -97,6 +110,11 @@ def nameSet(person_name):
             print("Name cannot be empty. Try again")
     return person_name
 
+def VictoryConditions(score):
+    Endgametype = 0
+    #victory conditions are in the docstring for endinggame()
+    #scores larger than 100 are victory conditions
+    return Endgametype
 
 def Updatelog():
     pass
@@ -105,7 +123,7 @@ def Updatelog():
 
 
 #game functions
-def StartGame():
+def StartGame(name):
     Intro_text = f"""
     Turns out being a werewolf isn’t what fantasy novels chock it up to be, at 
     least not a modern werewolf anyway. There’s no running through the woods 
@@ -121,7 +139,7 @@ def StartGame():
     teensy little security measure just doesn’t hold up. 
 
     It’s been a couple months since the last time you’ve had to jump ship, and 
-    this time you’re going by {player_name}.
+    this time you’re going by {name}.
 
     You’ve managed to settle in quite nicely. You’ve scored a great job and 
     managed to land a spot in a semi-stable group of friends. You’ve finally 
@@ -159,11 +177,8 @@ def StartGame():
             break
         except ValueError:
             print("Invalid input, please type exactly \"1\" or \"2\"")
-    MainGame() #this goes into the main game
+    MainGame(name) #this goes into the main game
         #block was found in stackoverflow: https://stackoverflow.com/questions/41832613/python-input-validation-how-to-limit-user-input-to-a-specific-range-of-integers
-        
-
-    EndingGame()
 
 def Tutorial():
     Tut_text = """
@@ -184,31 +199,99 @@ def Tutorial():
     You should really pick up that phone now, Cameron’s waiting, good luck!"""
     print(Tut_text)
 
-def MainGame():
+def MainGame(name):
     numquestions = len(person1keys) + len(person2keys) + len(person3keys)
     score = 0
     questionnumber = 0
-    while numquestions > 0: #main loop for the game
+    VictoryCond = 0
+    player_name = name
+    bugcondition = 0 #for exiting loop if got stuck
+    while VictoryCond == 0: #main loop for the game
+        bugcondition += 1
+        if numquestions == 0:
+            VictoryCond = 1
+            break
+        anslenlist = []
+        anslenstr = ""
         curquestion, curanswers = NextQuestion(score, questionnumber)
+        curquestion = curquestion.format(player_name = player_name)
         print(f"{curquestion}\n")
         for i in range(len(curanswers)):
-            print(curanswers[i])
-        print()
-        choice = input("Pick Answer 1, 2, or 3 by typing that number\n-> ")
+            print(curanswers[i][0])
+            anslenlist.append(i+1)
+        for i in range(len(anslenlist)):
+            anslenstr = anslenstr + str(anslenlist[i]) + ", "
+        anslenstr = anslenstr[:-3] + f"or {anslenlist[-1]}"
+        while True:
+            try: #this is for input validation
+                choice = input(f"Pick Answers {anslenstr} by typing that number (ex to exit if stuck)\n-> ")
+                if choice.isdigit() == True:
+                    choice = int(choice)
+                    if choice not in anslenlist:
+                        raise ValueError
+                    break
+                else:
+                    if "ex" in choice.lower():
+                        print("exiting game ... ")
+                        exit()
+                    raise ValueError
+            except ValueError:
+                print("Invalid input, please type exactly one of the numbers shown")
+            print()
+
         CurAnswScore = ScoreAnswer(choice, curanswers[choice-1])
         score += CurAnswScore
         questionnumber += 1
         numquestions -= 1 #this prevents endless loops
-    EndingGame()
+        if bugcondition > 500:
+            print("bugged code, exiting function ....")
+            exit()
+        VictoryCond = VictoryConditions(score)            
+        
+    EndingGame(VictoryCond)
     
 
-def EndingGame():
-    pass
+def EndingGame(victory):
+    """
+    victory condition 0: not possible, 0 means game is running
+
+    victory condition 1: out of questions. This is good, and can lead into winning flawlessly
+        victory condition 1.2: Flawless victory, all friends dont come and dont hate you
+        victory condition 1.3: Atleast 1 friend died
+        victory condition 1.4: All survived, but at least 1 hates you 
+    victory condition 2: All eaten - all friends get eaten
+    victory condition 3: All hate you - all friends hate you
+
+
+    specicial conditions
+        these are to figure out later, and will depend on special peramaters like certain answers chosen
+        these will start at 100
+
+
+    """
+    if victory == 1:
+        print("\nran out of questions")
+        sleep(2)
+    elif victory == 2:
+        pass
+    elif victory == 3:
+        pass
+    else:
+        print("unknown ending...\n...\n..")
+        print("bugged code srry")
+
+    print("Game end\n...\n...\n...") #placeholder for checking if this will be called
+    sleep(2)
+    exitgame = input("Do you want to play again or exit? \"Y\" for yes, anything else for no\n-> ")
+    if exitgame != "Y":
+        print("Thank you for playing")
+        exit()
 
 
 
-def Menuscreen(player_name=player_name): #unsure about the function input, this could be wrong
-    nonamechecknum = 3
+def Menuscreen(): #unsure about the function input, this could be wrong
+    player_name = ""
+    nonamechecknum = 2
     numofPeople = 2
     global startval #this is bad form, ill try to fix this later. This was just an easy fix
     
@@ -241,12 +324,12 @@ def Menuscreen(player_name=player_name): #unsure about the function input, this 
                     if nonamechecknum == 0: #this is a funny easteregg
                         print("Fine, name has been set to 'Billybob'. You win")
                         player_name = "Billybob"
-                        StartGame()
+                        StartGame(player_name)
                     else:
                         print("Please set a name first")
                         nonamechecknum -= 1
                 else:
-                    StartGame()
+                    StartGame(player_name)
             elif "NA" in menuinput:
                 player_name = nameSet(player_name)
             elif "FR" in menuinput: #sets friends
@@ -261,6 +344,8 @@ def Menuscreen(player_name=player_name): #unsure about the function input, this 
                 raise KeyError
         except ValueError:
             print("Invalid input, please type one of the four options\n")    
+        except KeyError:
+            exit()
 
 
 
@@ -269,4 +354,4 @@ def Menuscreen(player_name=player_name): #unsure about the function input, this 
 
 if __name__ == '__main__':
     # Write all functions in here that will be called when running the program
-    Menuscreen(player_name)
+    Menuscreen()
