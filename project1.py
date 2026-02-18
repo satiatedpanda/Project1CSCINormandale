@@ -44,6 +44,21 @@ person2 = {"Dawn: {player_name}, I got a funny text from Cameron. He said you’
              } #meek
     #intended answer weights: 1 = high impact, 2 = light, 3 = medium
 person2keys = list(person2.keys())
+person2questions = {"Phone Rings": [["What's Up", 2], ["Hello?", 2]], 
+                    "Are you coming to Johnny's party tonight": [["Yes", 1000], ["Probably not", 2], ["Fuck no", 1]], #I put 1000 as the score for "yes" because it ends the game, change it to whatever you want 
+                    "C'mon dude, It would be so fun": [["I have a stomach ache", 2], ["You think I can't entertain myself? I'm not your circus monkey", 1]],
+                    "{player_name}, that is sooooooo lame, just come over": [["Please no, any more pointless conversation is going to send me over the edge of insanity", 2], ["Wow, I didn't know my personal calendar needed your approval. Again, no.", 3]],
+                    "Wow, such big words. You can use plenty of those at the party tonight if you come. All of your friends are here. Just stay for like 30 minutes and then you can leave": [["Absolutely not, Especially if Don is there. He's been getting on my nerves recently", 1],["Again, dicating my already made schedule. Not cool, man", 3], ["I'm sorry, I just can't go. I have a frozen pizza in the oven that is calling my name", 2]], 
+                    "You woke up on the wrong side of the bed, didn't you? This is your last chance to accept my invite to the party.": [["Yes, I am sure", 2], ["Dude, stop asking, You know the answer", 3], ["Just hang up already", 1]], #this one and the one below it have the same answers because they are mean't for different responses to the question above 
+                    "Just throw it back into the freezer and come to the party. Are you really sure you dont want to go?": [["Yes, I am sure", 2], ["Dude, stop asking, You know the answer", 3], ["Just hang up already", 1]], #this is for the response: "I'm sorry, I just can't go. I have a frozen pizza in the oven that is calling my name"
+                    "Ok, fine. just don't blame me if you feel bad for not going later": [["I'll go next time you call for sure", 2], ["Don't worry, I won't", 3], ["Piss off", 1]], 
+                    }
+
+#Below are the three possible opinion messages at the end of the call. 
+
+#print("He will probably not ask you to any more parties")
+#print("he is bummed you aren't going to the party but will definitely invite you to the next one")
+#print("He will probably invite you to another party in the future")
 
 person3 = {} #Sock - meek
 person3keys = list(person3.keys())
@@ -354,4 +369,5 @@ def Menuscreen(): #unsure about the function input, this could be wrong
 
 if __name__ == '__main__':
     # Write all functions in here that will be called when running the program
+
     Menuscreen()
