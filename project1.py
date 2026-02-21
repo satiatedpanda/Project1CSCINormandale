@@ -29,7 +29,128 @@ person z: meek, needy lil' guy,
 startval = 1 #this changes the starting number in MainScore. This is for us to tinker with to adjust difficulty/game length
 
 #person1Questions = {"question": [["answer1", score, checkpoint1, 'otherFriendEffects'], ["answer2", score2, checkpoint2, 'otherFriendEffects2'] ["answers3", score3, checkpoint3, 'otherFriendEffects3']] <- example 
-person1 = {} #Cameron - av Joe
+person1 = {f"Hey {player_name}, it's Cam again. Just leaving you a mess-wait a minute... Holy hell, you picked up!": 
+                    [["1) Wow, I know, right? Mark the calendar - this is a historic moment. \n I figured I'd keep you on your toes this time", 0],
+                     ["2) Obviously, you're one of my best friends", 0],
+                     ["3) Suprise. I thought i'd save you the trouble fo finishing that voicemail. What's up?", 0]],
+                     "Dude! It's been like... I don't even know actually when the last time we talked was.": 
+                     [["1) It has been a while, I do miss our catch-ups.", 0],
+                      ["2) It hasn't been that long, has it.", 0],
+                      ["Yeah, I was starting to think you joined witness protection or something.", 0]], 
+                      "Where have you been? Lemme guess, you also got your life eaten by that really extensive story driven fantasy game that came out a while back?": 
+                      [["1) Maybe. but I regret nothing.", 0], 
+                       ["2) I plead the fifth. That game had me hooked.", 0],
+                       ["3) List... side quests dont't finish themselves, okay?", 0]], 
+                       "Ha, nice. I wish I had time for video games. I've had to set it down because work ramped up again.": 
+                       [["1) Work really said 'no fun allowed', huh?", 0],
+                        ["2) Respect the grind. still, that hurts", 0],
+                        ["3) We'll save a quest for when you're free", 0]],
+                        "Preparing for the seasonal crap six months ahead of time. I’m already tired of hearing about the holidays. Remember enjoying the holidays?": 
+                        [["1) Since 9 to 5's came into play, that is a thing of the past", 0],
+                         ["2) It sucks now but makes the holiday's that much better", 0],
+                         ["3) I don't know if you need to prepare this early but to each their own", 0]],
+                         "You’re still coming to Johnny’s party tonight right? You know it’s gonna be good. The guy always says he’s got a few things and then BOOM, whole fricken buffet of stuff you’ve never even heard of. Some of it you never wanted to hear of.": 
+                        [["1) I love his mashed potatoes", 0],
+                         ["2) The food is okay, some of his choices are questionable at best", 0],
+                         ["3) It's very hit or miss for me", 0]],
+                         "Hazelnut spread, banana pizza was a bit weird. I think it would’ve been better with cheese…": 
+                        [["1) I missed that one, it sounds like a recipe for stomach sadness", 0],
+                         ["2) Hate it say it but I think that might hit on the right night", 0],
+                         ["3) I always wonder what is going on in his head when he chooses these things", 0]],
+                         "Johnny’s got weird taste but I don’t think he’s a bad guy. Don’t be surprised if you hear from him too.": 
+                        [["1) Noted", 0],
+                         ["2) I'll have my notecards ready", 0],
+                         ["3) I don't know if I'm in the right mood to talk to him but I think I can manage", 0]],
+                         "He also got a new cat. Have you seen the pictures in the group chat?": 
+                        [["1) Well, I'm not too fond of cats", 0],
+                         ["2) I put my phone on Do Not Disturb after the 3rd photo", 0],
+                         ["3) I guess I'm happy for him... from a distance", 0]],
+                         "Wait, you seriously don’t like cats? That’s messed up man.": 
+                        [["1) It's not personal, I would just prefer I leave my feet unattacked", 0],
+                         ["2) Hey, I'm not heartless. I just respect them from a safe distance", 0],
+                         ["3) listen, someone has to say it", 0]],
+                         "Well… we’re gonna have some movies on! He’s got a poll going in the group chat for what we watch.": 
+                        [["1) Please tell me it's not a three hour mood film like last time.", 0],
+                         ["2) Sounds fun. I've got a super fun night planned, though.", 0],
+                         ["3) The groups movie choice are always so good.", 0]],
+                         "First spot is at a tie between two old horror movies.": 
+                        [["1) You know I love that!", 0],
+                         ["2) Sounds spooky", 0],
+                         ["3) My favorites", 0]],
+                         "There’s a slasher flick and a werewolf movie.": 
+                        [["1) Are we talking about modern horrors or classic horrors", 0],
+                         ["2) That's what I'm talking about!", 0],
+                         ["3) Again? We saw you of those like a week ago", 0]],
+                         "Obviously ‘Guy With Knife III’ is the correct choice.": 
+                        [["1) Of Course", 0],
+                         ["2) Finally, someone with taste.", 0],
+                         ["3) How did the other movies even stand a chance with that on the roster.", 0]],
+                         "Who’s gonna pick a movie about some overgrown pooch when you’ve got the *classic* horror movie set up that is stupid teenagers get got?": 
+                        [["1) Yeah, werewolves are so much cooler.", 0],
+                         ["2) Werewolfs and slashers, name a better combination", 0],
+                         ["3) You can't compare the folklore of werewolfs and the stupidness of teenagers.", 0]],
+                         "Nah dude, werewolves are lame.": 
+                        [["1) Sounds like someone who wouldn't survive a full moon", 0],
+                         ["2) They are moon powered shapeshifters and you consider them lame?", 0],
+                         ["3) You are definitely entitled to your opinion, but it is wrong unfortunatly.", 0]],
+                         "Kinda sad about Sock’s recommendation. They were the only one who voted for ‘The Night is Short, Walk on Girl’. I just don’t think anyone is gonna be up for reading subtitles.": 
+                        [["1) No one is gonna know what that is", 0],
+                         ["2) It is a good movie, maybe not for most though", 0],
+                         ["3) If we can deal with our group chat messages, we can read subtitles", 0]],
+                         f"Oh, if movies don’t sell it, there’s also gonna be Karaoke! Everyone should be drunk so no one will care how bad you sound {player_name}.": 
+                        [["1) My karaoke is legendary!", 0],
+                         ["2) Great, if everyone is drunk, I'll sound like Aretha Franklin", 0],
+                         ["3) Na, I'd get so embarrassed", 0]],
+                         "Nah see the way you get ahead of that is to go all in on the most ridiculous pop song ever. Just give the most hammered performance of your life.": 
+                        [["1) This is just know I get immortalized for that thing", 0],
+                         ["2) I get what you are aluding to: Weaponized cringe", 0],
+                         ["3) I just don't know, I get nervous about that sort of stuff", 0]],
+                         "Oh y’know what I was just thinking about? We never finished that board game from last time.": 
+                        [["1) It's funny how you remembered you were losing", 0],
+                         ["2) Aren't some things better left unfinished?", 0],
+                         ["3) Let's be real, I'm gonna win no matter what.", 0]],
+                         "No, not that one. The one where you build the house and then someone is a traitor.": 
+                        [["1) Good luck, I've been thinking about that one all week.", 0]
+                         ["2) That game has been haunting me", 0],
+                         ["3) I have a stomach ache, lets do that another time.", 0]],
+                         "Pretty sure Dawn got pissy and scattered the pieces after taking a bunch of sanity damage like three times in a row during their turn and then they weren’t the traitor.": 
+                        [["1) Shes always getting pissed about something", 0],
+                         ["2) To be honest, that was a frustrating game, I don't blame them.", 0],
+                         ["3) Well, I would've won that one too though.", 0]],
+                         "It could be fun to try it again. We could also play something with a rule book that isn’t 45 pages long though.": 
+                        [["1) finally - a game that doesn't require 30 minutes to explain the rules", 0],
+                         ["2) Anything under 15 pages seems like a dream right now", 0],
+                         ["3) That sounds nice", 0]],
+                         "So, do you need me to pick you up?": 
+                        [["1) Sure", 1000],
+                         ["2) Actually, maybe not tonight, I want to get to bed early", 0],
+                         ["3) Well, I have a stomach ache so maybe not tonight.", 0]],
+                         "Come on dude, my car finally stopped making that sound!": 
+                        [["1) I glad for that but I'm just not feeling it tonight.", 0],
+                         ["2) That's not going to fix my stomach ache though", 0],
+                         ["3) Finally, I thought that would go on forever", 0]],
+                         "Well first I thought maybe a racoon or something got in there with the way the speakers were thumping around. Something about the cold and the wiring to the radio.": 
+                        [["1) That makes sense, I know sometimes the cold can mess with the wiring", 0],
+                         ["2) Maybe it was a raccon DJ that played the bass way too loud in that death trap.", 0],
+                         ["3) That thing is a death trap.", 0]],
+                         "I think it’s unfair to keep calling her a death trap. Her engine hadn’t started smoking in a good few months!": 
+                        [["1) That car is a chaos magnet.", 0],
+                         ["2) She sould keep an eye out; that car is out to get her", 0],
+                         ["3) I don't know why she still drives that thing", 0]],
+                         "Alright, alright. Enough of these lies and slander. Carlotta is a fantastic machine and she deserves the world.": 
+                        [["1) I don't know about that.", 0],
+                         ["2) She deserves to be in a junkyard.", 0],
+                         ["3) She is more like a rolling paperweight than a car.", 0]],
+                         "You’re seriously gonna miss out on the party tonight because of vague tummy troubles?": 
+                        [["1) Yes, I'm sure", 0],
+                         ["2) I don't want to throw up.", 0],
+                         ["3) My stomach has it's own calendar and it's booked tonight.", 0]],
+                         "I mean I can let everyone else know but they’re probably not gonna be happy about it…": 
+                        [["1) Well, who cares what they think", 0],
+                         ["2) It is what it is", 0],
+                         ["3) Why would that matter", 0]],
+}
+ #Cameron - av Joe
 person1keys = list(person1.keys()) # this is for the quesiton indexes. This is so the questions and answers dont get mixed up
 
 #DONT convert questions into an f-string. We format the name into it later.
@@ -354,4 +475,5 @@ def Menuscreen(): #unsure about the function input, this could be wrong
 
 if __name__ == '__main__':
     # Write all functions in here that will be called when running the program
+
     Menuscreen()
