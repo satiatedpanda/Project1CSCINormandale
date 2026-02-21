@@ -1,7 +1,4 @@
-import random
-import collections
-import math
-import tkinter
+import keyboard
 from time import sleep
 
 """
@@ -23,10 +20,6 @@ person z: meek, needy lil' guy,
 
 
 """
-
-#global variables
-
-startval = 1 #this changes the starting number in MainScore. This is for us to tinker with to adjust difficulty/game length
 
 #person1Questions = {"question": [["answer1", score, checkpoint1, 'otherFriendEffects'], ["answer2", score2, checkpoint2, 'otherFriendEffects2'] ["answers3", score3, checkpoint3, 'otherFriendEffects3']] <- example 
 person1 = {} #Cameron - av Joe
@@ -53,19 +46,17 @@ person3keys = list(person3.keys())
 # person1keys[0] = #how to get the question itself
 
 MainScore = [] #idx+1 equals person number. will be in form [pers1, pers2,...,persX]
-scorecard = []
+
 
 
 
 
 #helper functions
 def ScoreAnswer(answer, score):
-    result = 0
-    result += sum(scorecard) #add scores to get result
-    if result > 15: #placeholder value is 15 - median
-        pass
-    else:
-        pass
+    result: int = 0
+    ansScore = answer[1]
+    OverallScore = score
+    result = ansScore + OverallScore
     return(result)
  
 def NextQuestion(score, questionNum):
@@ -73,12 +64,18 @@ def NextQuestion(score, questionNum):
     answers = []
     question = question + str(person2keys[questionNum]) #temporarry
     answers = person2[person2keys[questionNum]] #temporary
+    num_friend = 1
 
 
-    return(question, answers)
+    return(question, answers, num_friend)
 
 def friendsCnt(numpep, startvalue):
     startloop = "apples"
+    startloop = "oranges" #delete when adding more people
+    if startloop == "oranges":
+        print("Support for multiple friends is currently unavalible, please come back later...\n...")
+        print("Friends is set to 1\n")
+        return 1
     while True: #asks for input to do tutorial or not
         try: #this is for input validation
             if startloop == "apples":
@@ -162,9 +159,18 @@ def StartGame(name):
     friends aren’t going to make that easy. The alternative however is 
     potentially eating them at worst, possibly only mauling them at best. It’s
     what you’ve gotta do."""
-
-
-    print(Intro_text)
+    newtext = ""
+    for char in Intro_text:
+        while True:  # making a loop
+            try:  # used try so that if user pressed other than the given key error will not be shown
+                if keyboard.is_pressed('q'):  # if key 'q' is pressed 
+                    print('You Pressed A Key!')
+                break  # finishing the loop
+            except:
+                break  # if user pressed a key other than the given key the loop will break
+        sleep(0.03)
+        print(char, end="")
+        newtext = Intro_text[0]
     while True: #asks for input to do tutorial or not
         try: #this is for input validation
             tutorialY = input("""                                   1) View Tutorial?
@@ -208,12 +214,13 @@ def MainGame(name):
     bugcondition = 0 #for exiting loop if got stuck
     while VictoryCond == 0: #main loop for the game
         bugcondition += 1
+        friend_number = 0
         if numquestions == 0:
             VictoryCond = 1
             break
         anslenlist = []
         anslenstr = ""
-        curquestion, curanswers = NextQuestion(score, questionnumber)
+        curquestion, curanswers, friend_number = NextQuestion(score, questionnumber)
         curquestion = curquestion.format(player_name = player_name)
         print(f"{curquestion}\n")
         for i in range(len(curanswers)):
@@ -239,7 +246,7 @@ def MainGame(name):
                 print("Invalid input, please type exactly one of the numbers shown")
             print()
 
-        CurAnswScore = ScoreAnswer(choice, curanswers[choice-1])
+        CurAnswScore = ScoreAnswer(curanswers[choice-1], MainScore[friend_number-1])
         score += CurAnswScore
         questionnumber += 1
         numquestions -= 1 #this prevents endless loops
@@ -293,7 +300,7 @@ def Menuscreen(): #unsure about the function input, this could be wrong
     player_name = ""
     nonamechecknum = 2
     numofPeople = 2
-    global startval #this is bad form, ill try to fix this later. This was just an easy fix
+    startval = 1 #this changes the starting number in MainScore. This is for us to tinker with to adjust difficulty/game length
     
     Menu_text = """
                 ┌── ⋆⋅☆⋅⋆ ──.·:*¨༺ ☾ ༻¨*:·.── ⋆⋅☆⋅⋆ ──┐
