@@ -8,7 +8,68 @@ from time import sleep
 Docstring for project 1
 """
 
+num_people: int = 0
+def character_selection(num_people) -> str:
+           """
+           Allows the user to pick what character to talk to next
 
+           Parameters
+           -----------
+           num_people: [int]
+                      The amount of times this function is used 
+
+                      returns
+                      -------
+                      string 
+                                 The next chosen conversation path
+           """
+    defined_zero: int = 0
+    person1picked: int = 0
+    person2picked: int = 0
+    person3picked: int = 0
+    person1name: str = "Cameron"
+    person1bio: str = "He is suprisingly normal compared to your other friends"
+    person1rating: str = "They like you"
+    person2name: str = "Don"
+    person2bio: str = "They"
+    person2rating: str = "They hate you"
+    person3name: str = "Sock"
+    person3bio: str = "This is person 3. They are difficult"
+    person3rating: str = "They don't like you"
+    while num_people < 3: 
+        if person1picked == 0: 
+            print(f"{person1name}\n\n{person1bio}\n\n{person1rating}\n\nType 1 to choose\n------------------------------------------")
+        else: 
+            person1picked = 1
+        if person2picked == 0: 
+            print(f"{person2name}\n\n{person2bio}\n\n{person2rating}\n\nType 2 to choose\n------------------------------------------")
+        else: 
+                person2picked = 1
+        if person3picked == 0: 
+            print(f"{person3name}\n\n{person3bio}\n\n{person3rating}\n\nType 3 to choose\n------------------------------------------")
+        else: 
+            person3picked = 1
+        if defined_zero == 0:
+            list_num: int= [1,2,3]
+            try: 
+                character_picked = input("Which character would you like to call next? Type 1, 2 or 3 to choose.") 
+                response: int = int(character_picked)
+                if response not in list_num: 
+                    raise ValueError
+                response: int = int(character_picked)
+                print("\n\n") 
+                if response == 1: 
+                    person1picked += 1
+                    num_people += 1 
+                elif response == 2: 
+                    person2picked += 1
+                    num_people += 1 
+                elif response == 3: 
+                    person3picked += 1
+                    num_people += 1 
+            except ValueError:
+                print(f"That wasn't an integer!")
+                continue
 
 """
 personality types
