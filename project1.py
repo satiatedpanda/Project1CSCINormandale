@@ -16,12 +16,14 @@ def character_selection(num_people) -> str:
            Parameters
            -----------
            num_people: [int]
+           
                       The amount of times this function is used 
 
-                      returns
-                      -------
-                      string 
-                                 The next chosen conversation path
+           returns
+           -------
+           string 
+                      
+                      The next chosen conversation path
            """
     defined_zero: int = 0
     person1picked: int = 0
@@ -31,7 +33,7 @@ def character_selection(num_people) -> str:
     person1bio: str = "He is suprisingly normal compared to your other friends"
     person1rating: str = "They like you"
     person2name: str = "Don"
-    person2bio: str = "They"
+    person2bio: str = "Their attitude makes "
     person2rating: str = "They hate you"
     person3name: str = "Sock"
     person3bio: str = "This is person 3. They are difficult"
@@ -51,25 +53,25 @@ def character_selection(num_people) -> str:
             person3picked = 1
         if defined_zero == 0:
             list_num: int= [1,2,3]
+           character_picked = input("Which character would you like to call next? Type 1, 2 or 3 to choose.") 
             try: 
-                character_picked = input("Which character would you like to call next? Type 1, 2 or 3 to choose.") 
                 response: int = int(character_picked)
                 if response not in list_num: 
                     raise ValueError
-                response: int = int(character_picked)
-                print("\n\n") 
-                if response == 1: 
-                    person1picked += 1
-                    num_people += 1 
-                elif response == 2: 
-                    person2picked += 1
-                    num_people += 1 
-                elif response == 3: 
-                    person3picked += 1
-                    num_people += 1 
-            except ValueError:
+           except ValueError:
                 print(f"That wasn't an integer!")
                 continue
+           print("\n\n") 
+           if response == 1: 
+                      person1picked += 1
+                      num_people += 1 
+           elif response == 2: 
+                      person2picked += 1
+                      num_people += 1 
+           elif response == 3: 
+                      person3picked += 1
+                      num_people += 1 
+            
 
 """
 personality types
