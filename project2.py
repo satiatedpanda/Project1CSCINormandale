@@ -90,7 +90,17 @@ def checkpoint_execute() -> None:
             print("Please type \'Y\' or \'N\'.")
         return None #temporary, returning location in a dictionary to continue from there.
 
-def character_selection(num_of_friends, character_picked: int = None) -> int:
+def define_likeability(score: float) -> str:
+    char_str = ""
+    if score < 0.25:
+        char_str = char_str + "They like you too much - they are in danger of coming to your house"
+    elif score > 0.75:
+        char_str = char_str + "Your responses have been too hurtful - they hate you"
+    else:
+        char_str = char_str + "Their opinion of you is still in flux - they feel neutral towards you"
+    return char_str
+
+def character_selection(num_of_friends, character_picked: int, charcter_scores: list[float]) -> int:
     """
            Allows the user to pick what character to talk to next
 
@@ -106,9 +116,9 @@ def character_selection(num_of_friends, character_picked: int = None) -> int:
                 The next character chosen
     """
     list_num: list[int]= [1,2,3]
-    if num_of_friends > 3:
+    if num_of_friends < 3:
         if num_of_friends == 2: #switches the person you are calling if you only have 2 friends
-            if num_of_friends % 2 == 0:
+            if character_picked == 2:
                 return int(1)
             return int(2)
         if num_of_friends == 1: #this skips picking the person if you only have 1 friend
@@ -116,16 +126,17 @@ def character_selection(num_of_friends, character_picked: int = None) -> int:
     if character_picked != None:
         list_num.remove(int(character_picked))
 
-    person_info: dict[str] = {"Cameron": ["He is suprisingly normal compared to your other friends\n\nHe Likes You\n\n(515) 602-6027\n\n"],
-                              "Don": ["He is very abrasive and difficult but has very good social connections\n\nHe Likes You\n\n(603) 502-6015\n\n"], 
-                              "Sock": ["They can be very anxious and high maintence sometimes but can make a mean pumpkin pie\n\nThey Like You\n\n(703) 503-6029\n\n"]
+    person_info: dict[str] = {"Cameron": "He is suprisingly normal compared to your other friends\n(515) 602-6027\n",
+                              "Don": "He is very abrasive and difficult but has very good social connections\n(603) 502-6015\n", 
+                              "Sock": "They can be very anxious and high maintence sometimes but can make a mean pumpkin pie\n(703) 503-6029\n"
 }
+    print("Call ended with ")
     if 1 in list_num: 
-        print(f"Cameron \n\n{person_info['Cameron'][0]}Type 1 to choose\n------------------------------------------")
+        print(f"Cameron \n\n{person_info['Cameron']}{define_likeability(charcter_scores[0])}\nType 1 to choose\n------------------------------------------")
     if 2 in list_num: 
-        print(f"Don \n\n{person_info['Don'][0]}Type 2 to choose\n------------------------------------------")
+        print(f"Don \n\n{person_info['Don']}{define_likeability(charcter_scores[1])}Type 2 to choose\n------------------------------------------")
     if 3 in list_num: 
-        print(f"Sock \n\n{person_info['Sock'][0]}Type 3 to choose\n------------------------------------------")
+        print(f"Sock \n\n{person_info['Sock']}{define_likeability(charcter_scores[2])}Type 3 to choose\n------------------------------------------")
     while True:
         try: 
             character_picked = int(input("Which character would you like to call next? Type 1, 2 or 3 to choose.\n-> ")) 
@@ -317,7 +328,7 @@ def Tutorial():
 
 def MainGame(name, num_of_friends):
     #The guts of our game! Takes in the Player name, and then calls the helper functions to complete the processes in the game!
-    numquestions: int = len(person1keys)
+    numquestions: int = len(person1keys) + len(person2keys) + len(person3keys)
     questionnumber: int = 0
     VictoryCond: int = 0
     player_name: str = name
@@ -327,7 +338,7 @@ def MainGame(name, num_of_friends):
         anslenlist: list = []
         anslenstr: str = ""
         if (questionnumber % 6 == 0) and (questionnumber != 0):
-            friend_number = character_selection(num_of_friends, friend_number)
+            friend_number = character_selection(num_of_friends, friend_number, MainScore)
         curquestion, curanswers = NextQuestion(friend_number, answered_questions)
         curquestion = curquestion.format(player_name = player_name) #formats the player name into the text
         if (questionnumber % 12 == 0) and (questionnumber != 0): #checking the number of the question to spit out checkpoint
@@ -368,18 +379,17 @@ def MainGame(name, num_of_friends):
         CurAnswScore = ScoreAnswer(curanswers[choice-1])
         answered_questions[friend_number - 1] += 1
         MainScore[friend_number-1] = round(MainScore[friend_number-1] + CurAnswScore, 3) #this is to stop floating point weirdness
-        for i in range(len(MainScore)):
-            friend_name_list = ["Cameron", "Dawn", "Sock"]
-            print (f"\n{friend_name_list[i]} is at {MainScore[i]} friendship points")
-            sleep(1)
-            if (MainScore[i] <= 0) or (MainScore[i] >= 1):
-                VictoryCond = VictoryConditions(MainScore[friend_number-1]) 
-            elif MainScore[i] < 0.25:
-                print("Warning! Your friend is growing concerned!")
-            elif MainScore[i] > 0.75:
-                print("Warning! Hatred is seeping through your friend!")
-            sleep(2)
-            print("\n\n")
+        friend_name_list = ["Cameron", "Dawn", "Sock"]
+        print (f"\n{friend_name_list[friend_number-1]} is at {MainScore[friend_number-1]} friendship points")
+        sleep(1)
+        if (MainScore[friend_number-1] <= 0) or (MainScore[friend_number-1] >= 1): ###### WORK ON THIS
+            VictoryCond = VictoryConditions(MainScore[friend_number-1]) 
+        elif MainScore[friend_number-1] < 0.25:
+            print("Warning! Your friend is growing concerned!")
+        elif MainScore[friend_number-1] > 0.75:
+            print("Warning! Hatred is seeping through your friend!")
+        sleep(2)
+        print("\n\n")
         questionnumber += 1
         numquestions -= 1 #this prevents endless loops
         if numquestions == 0:
@@ -692,123 +702,123 @@ if __name__ == '__main__':
     person1keys = list(person1.keys()) # This is for the question indexes
     person2: dict[str, list[list]] = {"Dawn: {player_name}, I got a funny text from Cameron. He said you’re not\n going to the party tonight. I told him that was a pretty good joke but he\n says he’s serious, so how about you set the record straight for the both of us.": 
            [["1) Ugh… He’s right?", 2], 
-           ["2) Okay first, you’re at an 11 when this should be a 4 conversation, and\n   second, yeah I’m staying in tonight.", 3], 
-           ["3) I’m just not really feeling it tonight.", 1]], 
+           ["2) Okay first, you’re at an 11 when this should be a 4 conversation, and\n   second, yeah I’m staying in tonight.", 2], 
+           ["3) I’m just not really feeling it tonight.", 2]], 
            "Dawn: And you thought I was just gonna let that go? C’mon, you know what I’m\nabout right? This is a no fly zone for BS {player_name} Are you gonna try to\npretend you have amnesia now?": 
            [["1) I have been feeling a bit forgetful lately.", 2], 
-           ["2) There’s no forgetting an asshole like you.", 3], 
+           ["2) There’s no forgetting an asshole like you.", 2], 
            ["3) No BS here, these ducks are neat and orderly in their rows.", 2]],
            "Dawn: Oh for the love of… Why do I hang out with you again?": 
            [["1) Your friend options are limited because you greet people by punching them?", 2], 
-           ["2) I ask that same question every day.", 3], 
-           ["3) Because I make the best damn enchiladas you’ve ever had.", 1]],
+           ["2) I ask that same question every day.", 2], 
+           ["3) Because I make the best damn enchiladas you’ve ever had.", 2]],
            "Dawn: That aside, since when do you skip out on free drinks and bad karaoke?\nDon’t give me any of that ‘I’m not feeling it’ crap. We both know that lie’s\nlike a cheap rug.": 
-           [["1) I just don’t want to.", 3], 
+           [["1) I just don’t want to.", 2], 
            ["2) Stomach’s being weird, probably not good for drinking. It’ll lead to puking.", 2], 
-           ["3) My karaoke is legendary, thank you.", 1]],
+           ["3) My karaoke is legendary, thank you.", 2]],
            "Dawn: So I’m just gonna tell you what I think. I think you're actively\navoiding us. You blew Cameron off twice in the past month.": 
-           [["1) Hey, woah! Let’s back pedal a bit here, I am not avoiding anyone.", 1], 
+           [["1) Hey, woah! Let’s back pedal a bit here, I am not avoiding anyone.", 2], 
            ["2) Alright maybe I did dodge a few hang outs, but you’re reaching pretty far \nhere.", 2], 
-           ["3) It’s Sock. He’s just so… Wimpy.", 3]],
+           ["3) It’s Sock. He’s just so… Wimpy.", 2]],
            "Dawn: You also seem to  find every excuse under the sun not to hang out\nwith Sock.": 
-           [["1) What did I just say? Are you hard of hearing or something?", 3], 
-           ["2) It's not that I don't want to hang out with Sock...", 1], 
+           [["1) What did I just say? Are you hard of hearing or something?", 2], 
+           ["2) It's not that I don't want to hang out with Sock...", 2], 
            ["3) Yeah, and?", 2]],
            "Dawn: And let’s be very clear, only I am allowed to make fun of sad Sock.\nGot it?":
            [["1) Whatever.", 2], 
-           ["2) Got it.", 1], 
-           ["3) Okay buddy...", 3]],
+           ["2) Got it.", 2], 
+           ["3) Okay buddy...", 2]],
            "Dawn: You get that privilege when you spend the better part of your last two\nyears of high school pulling straws out of his hair and un-gumming his locker.": 
            [["1) Well aren't you just a saint.", 2], 
-           ["2) I feel like you also are one of the causes of the gum on his \n    locker.", 3], 
-           ["3) That's... surprisingly nice of you. Ya'll go that far back?", 1]],
+           ["2) I feel like you also are one of the causes of the gum on his \n    locker.", 2], 
+           ["3) That's... surprisingly nice of you. Ya'll go that far back?", 2]],
            "Dawn: If you come to the party you’ll get to hear all about the ancient\nhistory. I’ve got tons of stories about what those two chuckle heads got up\nto. No spoilers, that’s a live event or you wait for the day Cameron or Sock\nMAY tell you.": 
            [["1) Well... guess I gotta wait for one of them to spill the beans.", 2], 
            ["2) Not even a little spoiler?", 2], 
-           ["3) Oh no... anyway.", 3]],
+           ["3) Oh no... anyway.", 2]],
            "Dawn: Seriously {player_name}, you’re telling me with all that, you’d still\nrather rot in that crap apartment watching shitty reruns than hang out with\nus at one of Johnny's parties?": 
-           [["1) No, but I just need to stay home and decompress tonight.", 1], 
-           ["2) Absolutely.", 3], 
+           [["1) No, but I just need to stay home and decompress tonight.", 2], 
+           ["2) Absolutely.", 2], 
            ["3) It’s a toss up really, kind of worried about my… appetite.", 2]],
            "Dawn: Okay if I’m being for real though, I probably would ditch to if it\nwere to re-watch the last season of 12 Desperate Women and 1 Paid Actor.\nI’m more than certain at least one of those women were also paid actors.": 
-           [["1) I. am. shocked.", 1], 
+           [["1) I. am. shocked.", 2], 
            ["2) Nah, no way dude.", 2], 
-           ["3) I really don't care.", 3]],
+           ["3) I really don't care.", 2]],
            "Dawn: Pretty sure it was the one with the high cheekbones, sharp jawline, and\ntiny nose. Not that first one that everyone thinks of, the other one.": 
            [["1) That's so specific.", 2], 
-           ["2) I really really don't care.", 3], 
+           ["2) I really really don't care.", 2], 
            ["3) Rebecca? No... Tammy?", 2]],
            "Dawn: I know none of it’s real. I'm not a god damn moron. It’s fun to pick at\nbecause it’s so glaringly fake. Like eating chicken nuggets from Clown Burger.": 
-           [["1) That's a weird connection between those two things.", 3], 
+           [["1) That's a weird connection between those two things.", 2], 
            ["2) Ugh, now I really want chicken nuggets. Damnit, Dawn.", 2], 
-           ["3) At least you're not delusional.", 1]],
+           ["3) At least you're not delusional.", 2]],
            "Dawn: Okaaaaay, trash tv aside. You do need to make some kind of effort here\nto hang out with us.": 
-           [["1) I mean I really want to, but just not tonight.", 1], 
-           ["2) Thank god, you're done going on and on about that.", 3], 
+           [["1) I mean I really want to, but just not tonight.", 2], 
+           ["2) Thank god, you're done going on and on about that.", 2], 
            ["3) I do make the effort!", 2]],
            "Dawn: Pretty sure the last time you hung out with all of us was at the beginning\nof the month. We all tried making breakfast with Cameron’s grandma’s prehistoric\nwaffle pan and it almost burned a hole in the counter.": 
-           [["1) That only happened because Cameron’s an idiot.", 3], 
-           ["2) Y’know, I think waffles are an acceptable reason to cause a house fire.", 1], 
+           [["1) That only happened because Cameron’s an idiot.", 2], 
+           ["2) Y’know, I think waffles are an acceptable reason to cause a house fire.", 2], 
            ["3) That wasn’t our best idea.", 2]],
            "Dawn: I’ve got half a mind to come down there and drag you out myself. How\nmuch do you weigh again? Nevermind, the exact number doesn’t matter, I’m\npretty sure I can deadlift your ass.": 
-           [["1) NO! THAT IS FORBIDDEN! NO LIFTING OF THE ME!", 3], 
+           [["1) NO! THAT IS FORBIDDEN! NO LIFTING OF THE ME!", 2], 
            ["2) That’s a lot of effort for you to waste on my feeble, pathetic ass.",2], 
-           ["3) Wow.", 1]],
+           ["3) Wow.", 2]],
            "Dawn: Actually I’m certain I can. I’m up to 1.5x my own body weight. My new\nmetric is gonna be in how many {player_name}’s I can lift.": 
-           [["1) That'd be kind of rad actually.", 1], 
+           [["1) That'd be kind of rad actually.", 2], 
            ["2) This is dumb. Why are you dumb?", 2], 
-           ["3) No. Absolutely not. Don't ever. Bad!", 3]],
+           ["3) No. Absolutely not. Don't ever. Bad!", 2]],
            "Dawn: Then you’re going to show up to prevent that very real possibility?\nCan't do much else to prevent the darkest timeline.": 
-           [["1) I can hang up.", 3], 
+           [["1) I can hang up.", 2], 
            ["2) What if... we just didn't do that? Eh???", 2], 
-           ["3) COME AT ME YOU COWARD!", 1]],
+           ["3) COME AT ME YOU COWARD!", 2]],
            "Dawn: Okay, I’ve got better. If threatening to chuck your ass like the\nuseless boulder you are doesn't work, then think of all the drunken\ndumbassery that you’re gonna miss out on! ...Not that I keep receipts of this\nstuff or anything.": 
            [["1) We both know that’s a lie. I don't even want to know how many lives\n   you've ruined.", 2], 
            ["2) Riiiiiight.", 2], 
-           ["3) That's just... kind of awful.", 3]],
+           ["3) That's just... kind of awful.", 2]],
            "Dawn: Oh come on. What else keeps people in check other than the irrational\nfear that a stranger might think what they’re currently doing is really\nembarrassing? It makes for great currency.": 
            [["1) Now I am more than certain you run a blackmail ring.", 2], 
-           ["2) That’s a red flag in a pile of red flags.", 3], 
-           ["3) Ugh… getting uncomfortable.", 1]],
+           ["2) That’s a red flag in a pile of red flags.", 2], 
+           ["3) Ugh… getting uncomfortable.", 2]],
            "Dawn: Now you sound like sad Sock, ‘D-dawn that’s mu-mu-mu-mean!’ I can’t\ncarry two perpetual whiners, you need to pick a different role.": 
-           [["1) How about the guy that stays home from parties?", 1], 
+           [["1) How about the guy that stays home from parties?", 2], 
            ["2) Maybe I LIKE being a giant crybaby!", 2], 
-           ["3) Or you could stop being such a jerk for five whole minutes?", 3]],
+           ["3) Or you could stop being such a jerk for five whole minutes?", 2]],
            "Dawn: This again? Shelve it. It’s kind of pathetic.": 
-           [["1) Not as pathetic as you.", 3], 
-           ["2) Alright fine, it’s shelved.", 1], 
+           [["1) Not as pathetic as you.", 2], 
+           ["2) Alright fine, it’s shelved.", 2], 
            ["3) I’m forgetting what the purpose of this conversation was.", 2]],
            "Dawn: Yucks aside, whole point of this song and dance: You. Party. Tonight\nNon-negotiable. I’m getting tired of repeating the same thing. When is it\ngetting into your thick skull that you’re going to the party?": 
            [["1) I’m. Busy. Tonight. Non-negotiable.", 2], 
-           ["2) I really can’t Dawn, I’ll try to make it up to you guys another time.", 1], 
-           ["3) I just want to watch bad movies by myself and sleep, is that a crime?", 3]],
+           ["2) I really can’t Dawn, I’ll try to make it up to you guys another time.", 2], 
+           ["3) I just want to watch bad movies by myself and sleep, is that a crime?", 2]],
            "Dawn: Alright, you’ve forced my hand. I’m calling in the big guns. There’s\nno point in trying to stop me. It’s happening.": 
-           [["1) What are you doing?", 1], 
-           ["2) I swear if you show up at my house to try to lift me...", 3], 
+           [["1) What are you doing?", 2], 
+           ["2) I swear if you show up at my house to try to lift me...", 2], 
            ["3) Dawn, please...", 2]],
            "Dawn: I’m messaging Sock and telling him you’re trying to flake on us. You\nleft me no choice.": 
            [["1) Ugh... why???", 2], 
-           ["2) You absolute horse's ass! Stop it!", 3], 
+           ["2) You absolute horse's ass! Stop it!", 2], 
            ["3) I mean... oh no?", 2]],
            "Dawn: Aaaaaaand done. Get ready for that because it’s going to be waaaaay\nworse than talking to me or Cameron was.": 
-           [["1) You suck.", 3], 
-           ["2) Thanks... really.", 1], 
+           [["1) You suck.", 2], 
+           ["2) Thanks... really.", 2], 
            ["3) Okay, that's gonna be a time.", 2]],
            "Dawn: I tried to give you an out. Now you get to explain it to King\nWaterworks why one of his security buddies is going to be MIA.": 
-           [["1) AAAAAAAAAAAAAAAAAA-", 3], 
+           [["1) AAAAAAAAAAAAAAAAAA-", 2], 
            ["2) Yep, now I get to do that. Again, thanks.", 2], 
-           ["3) I'm genuinely questioning the basis of our friendship right now.", 1]],
+           ["3) I'm genuinely questioning the basis of our friendship right now.", 2]],
            "Dawn: Is it so hard to believe we’re all doing this because we haven’t seen\nyou in a while and want to hang out with you, {player_name}?": 
-           [["1) You have a REALLY funny way of showing THAT.", 1], 
-           ["2) I think you enjoy being as annoying as possible.", 3], 
+           [["1) You have a REALLY funny way of showing THAT.", 2], 
+           ["2) I think you enjoy being as annoying as possible.", 2], 
            ["3) I mean... kind of with how you've gone about this?", 2]],
            "Dawn: That is the closest you are going to get to me saying anything of that\nsort. I don’t do mush.": 
-           [["1) I don't think that can count as \'mush\'.", 1], 
+           [["1) I don't think that can count as \'mush\'.", 2], 
            ["2) I guess that was... an attempt made.", 2], 
-           ["3) We're aware.", 3]],
+           ["3) We're aware.", 2]],
            "Dawn: Alright, I’m already regretting trying to appeal to pathos. Retracting\nall sentimentality. Just get your ass to the party.": 
-           [["1) No.", 3], 
-           ["2) Sorry, Dawn. Maybe next time.", 1], 
+           [["1) No.", 2], 
+           ["2) Sorry, Dawn. Maybe next time.", 2], 
            ["3) This has been utterly exhausting. I need a nap.", 2]],
            "ENDINGS": 
            [["Dawn: Ugh, fine. Enjoy your night alone or whatever, but you’ve got to come\nout with us next week.", 2], #Good ending
@@ -818,120 +828,120 @@ if __name__ == '__main__':
     #intended answer weights: 1 = high impact, 2 = light, 3 = medium
     person2keys = list(person2.keys()) #not a dictionary currently # FIX TONIGHT
     person3: dict[str, list[list]] = {"Sock: Ugh… heeeey {player_name}. Long time no see… or talk…": 
-           [["1) Who is this again?", 3], 
-           ["2) Oh, hey sock.", 1], 
+           [["1) Who is this again?", 2], 
+           ["2) Oh, hey sock.", 2], 
            ["3) Ew, vermin in my dms!", 2]],
            "Sock: Are you really not going to Johnny’s party? It’s supposed to be a\ngood one since… y’know it’s one of *Johnny’s* parties…": 
            [["1) There's so many better things to do at home though...", 2], 
-           ["2) No.", 3], 
-           ["3) Maybe another time.", 1]],
+           ["2) No.", 2], 
+           ["3) Maybe another time.", 2]],
            "Sock: Is it weird if I ask why? I mean, it’s your business and all but… I\ndon’t know {player_name}, I just feel weird going to one of those things without\nthe whole group.": 
            [["1) I want to eat chips and sleep instead.", 2], 
-           ["2) Ugh... That's a secret...", 1], 
-           ["3) Don't be such a wuss.", 3]],
+           ["2) Ugh... That's a secret...", 2], 
+           ["3) Don't be such a wuss.", 2]],
            "Sock: I mean I guess it’s fine if you don’t want to go. It’l just be me,\nCameron, and Dawn…": 
-           [["1) I believe in you space cadet.", 1], 
-           ["2) You'll live.", 3], 
+           [["1) I believe in you space cadet.", 2], 
+           ["2) You'll live.", 2], 
            ["3) Could be so much worse.", 2]],
            "Sock: So would you rather just want to hang out at your place instead? Not that\nI don’t want to go! I love parties!": 
            [["1) Oh no... no no no.", 2], 
            ["2) It's okay, you don't have to pretend.", 2], 
-           ["3) Cool, have fun then!", 1]],
+           ["3) Cool, have fun then!", 2]],
            "Sock: No I-I really love parties! With how loud everything is and how\neveryone is just in your face slurring…": 
-           [["1) Wear headphones.", 3], 
-           ["2) Aw yeah, it's the best!", 1], 
+           [["1) Wear headphones.", 2], 
+           ["2) Aw yeah, it's the best!", 2], 
            ["3) It gets pretty annoying.", 2]],
            "Sock: I mean… It's what everyone likes to do and I want to hang out with\neveryone. I don’t want to muck up what already works.": 
-           [["1) I can get that.", 1], 
+           [["1) I can get that.", 2], 
            ["2) Why don't you plan your own thing?", 2], 
-           ["3) You're kind of a doormat.", 3]],
+           ["3) You're kind of a doormat.", 2]],
            "Sock: I tried making a book club happen. No one actually read the books… I\ndon’t think Dawn even tried.": 
-           [["1) Maybe pick better books?", 3], 
+           [["1) Maybe pick better books?", 2], 
            ["2) That's rough buddy.", 2], 
-           ["3) Sounds like something Dawn would do.", 1]],
+           ["3) Sounds like something Dawn would do.", 2]],
            "Sock: It’s just… Why can’t we just do stuff that isn’t so loud and obnoxious?\nWhy does Johnny have to invite a bunch of weird people we’ve never met before?": 
            [["1) The more the merrier!", 2], 
-           ["2) Have you tried earplugs?", 1], 
-           ["3) Whiner, you're a whiner.", 3]],
+           ["2) Have you tried earplugs?", 2], 
+           ["3) Whiner, you're a whiner.", 2]],
            "Sock: It would be way better if it were just us. I really don’t like a bunch of\nstrangers looking at me and then I have to make small talk that I’m pretty sure\nthey don’t care about.": 
-           [["1) Odds are no one is staring at you as hard as you think.", 1],
-            ["2) Just talk to people, it's not hard.", 3], 
+           [["1) Odds are no one is staring at you as hard as you think.", 2],
+            ["2) Just talk to people, it's not hard.", 2], 
             ["3) Yeah...", 2]],
            "Sock: I just walk away feeling like I’ve made a giant idiot of myself and now\nthey’re laughing at me with the next person they talk to. \‘Hey see that person\nover there? They’ve never spent a day on earth before.\’":
-           [["1) Holy catastrophizing Manbat.", 3], 
-            ["2) It can be scary putting yourself out there.", 1], 
+           [["1) Holy catastrophizing Manbat.", 2], 
+            ["2) It can be scary putting yourself out there.", 2], 
             ["3) Uhm... you okay buddy?", 2]],
            "Sock: \‘They probably never leave their house that smells like old mustard,\ntheir friends are all carefully constructed lies assigned by the government,\nand they suck at dancing.\’": 
-           [["1) Sock, snap out of it!", 3], 
+           [["1) Sock, snap out of it!", 2], 
             ["2) Holy shit dude.", 2], 
-            ["3) You do kinda smell like old mustard.", 1]],
+            ["3) You do kinda smell like old mustard.", 2]],
            "Sock: Except the government wouldn’t assign me friends (player_name). You’d all\njust be like… alien surveillance agents here to make sure I don’t spread my\nsocial ineptitude to every actual human on this planet.": 
            [["1) When was the last time you went outside?", 2], 
-            ["2) Yep, we're just the Sock Survelliance Experts.", 1], 
-            ["3) No one would waste that kind of effort.", 3]],
+            ["2) Yep, we're just the Sock Survelliance Experts.", 2], 
+            ["3) No one would waste that kind of effort.", 2]],
            "Sock: Yeah… actually let’s just forget the whole thing. I’ll come hang out\nwith you tonight instead!": 
            [["1) Abort this mission!", 2], 
-            ["2) No!", 3], 
-            ["3) Let's think of something else to do here.", 1]],
+            ["2) No!", 2], 
+            ["3) Let's think of something else to do here.", 2]],
            "Sock: It’ll be way better than whatever happens at Johnny’s place. Cam tried to\nget me excited about the whole thing because I guess Johnny got a new cat?": 
            [["1) Think of the horrible creature you're fond of!", 2], 
-            ["2) No one would be excited by a cat.", 3], 
-            ["3) Maybe it likes to be petted?", 1]],
+            ["2) No one would be excited by a cat.", 2], 
+            ["3) Maybe it likes to be petted?", 2]],
            "Sock: The poor thing is probably going to be hiding under the couch the entire\ntime…": 
-           [["1) Where it belongs.", 3], 
+           [["1) Where it belongs.", 2], 
             ["2) Oh, poor goblin creature I guess.", 2], 
-            ["3) Where it'll need a friend!", 1]],
+            ["3) Where it'll need a friend!", 2]],
            "Sock: It’s probably weird being a cat. Animals just blindly trust that we know\nwhat we’re doing and that what we’re doing is the correct thing.": 
-           [["1) Pets have it rough.", 1], 
+           [["1) Pets have it rough.", 2], 
             ["2) Ugh... okay?", 2], 
-            ["3) Who cares.", 3]],
+            ["3) Who cares.", 2]],
            "Sock: My dog probably doesn’t even know when or if I’m coming home when I leave.\nHe’s just trusting that the loneliness is only temporary.": 
            [["1) Oh... oh no.", 2], 
-            ["2) I'm worried about you, Sock.", 1], 
-            ["3) Can you cut the crazy talk for five seconds?", 3]],
+            ["2) I'm worried about you, Sock.", 2], 
+            ["3) Can you cut the crazy talk for five seconds?", 2]],
            "Sock: If I’m being honest… I wish I could just crawl under the furniture during\nthe party. I really don’t want to go if everyone isn’t gonna be there.": 
            [["1) Therapy. Acquire the therapy.", 2], 
-            ["2) With enough alchohol, you too can crawl under the couch.", 1], 
-            ["3) Yikes.", 3]],
+            ["2) With enough alchohol, you too can crawl under the couch.", 2], 
+            ["3) Yikes.", 2]],
            "Sock: Dawn says I should go because I have to at least try not to be a\nsniveling slug for my entire life but it’s just a lot, {player_name}.": 
            [["1) Wow, Dawn sure is a peach.", 2], 
-            ["2) Yeah, I hear ya.", 1], 
+            ["2) Yeah, I hear ya.", 2], 
             ["3) Slug Soooooooooock!", 2]],
            "Sock: They’re kind of a jerk but I think they mean well… I hope they do at least. They’re pretty excited about the karaoke.": 
            [["1) I guess...", 2], 
-            ["2) Say \'potato\' if you need help.", 1],
-            ["3) Oh god, not karoake again.", 3]],
+            ["2) Say \'potato\' if you need help.", 2],
+            ["3) Oh god, not karoake again.", 2]],
            "Sock: We’re probably gonna have to listen to Dawn sing Seasoning Women again and\nthen complain that it wasn’t good because we didn’t want to join them for it.": 
            [["1) They never let me be Scary Spice.", 2], 
             ["2) NOOOOOOOO!", 2],
-            ["3) It'll be a time.", 1]],
+            ["3) It'll be a time.", 2]],
            "Sock: I was hoping maybe the movie thing would pan out but it looks like it’s\njust a bunch of dated horror flicks.": 
-           [["1) Let me guess, too spooky for you?", 3], 
+           [["1) Let me guess, too spooky for you?", 2], 
             ["2) The two Cam mentioned are actually not bad.", 2],
-            ["3) It's so lame!", 1]],
+            ["3) It's so lame!", 2]],
            "Sock: They’re just boring, {player_name}. I don’t get why so many people go nuts\nfor the same thing over and over again.": 
            [["1) Something something consumerism.", 2], 
-            ["2) I know right?", 1],
-            ["3) Genuinely shocked that horror movies don't ruffle your feathers but\ntalking to strangers does.", 3]],
+            ["2) I know right?", 2],
+            ["3) Genuinely shocked that horror movies don't ruffle your feathers but\ntalking to strangers does.", 2]],
            "Sock: I threw in what was basically the movie version of the anime series\nTatami Galaxy. The art style is pretty neat.":
            [["1) What Galaxy?", 2], 
-            ["2) Are people gonna be able to read subs that fast drunk?", 1],
-            ["3) That movie sucks.", 3]],
+            ["2) Are people gonna be able to read subs that fast drunk?", 2],
+            ["3) That movie sucks.", 2]],
            "Sock: That show was made over ten years ago though so I don’t know if anyone\ncares about it now.":
            [["1) Might be a bit of a deep cut.", 2], 
-            ["2) Yeah, no one cares about it.", 3],
-            ["3) It's still good even if it isn't recent.", 1]],
+            ["2) Yeah, no one cares about it.", 2],
+            ["3) It's still good even if it isn't recent.", 2]],
            "Sock: Maybe I can run away halfway through the party? Give it just enough time\nfor people to start drinking and then I sneak away. They’ll think the aliens\nfinally came back to take me home.":
            [["1) People are gonna report you as missing.", 2], 
-            ["2) Sneaking out of a party isn't necessary.", 1],
-            ["3) Just leave if you want to like a normal person.", 3]],
+            ["2) Sneaking out of a party isn't necessary.", 2],
+            ["3) Just leave if you want to like a normal person.", 2]],
            "Sock: So you’re really, really serious about not going? Even though it’ll\nprobably be a giant disaster without you there?":
-           [["1) I trust you to weather this storm.", 1], 
-            ["2) Dead serious.", 3],
+           [["1) I trust you to weather this storm.", 2], 
+            ["2) Dead serious.", 2],
             ["3) I really can't tonight.", 2]],
            "Sock: I suppose… I guess I can try to find a way to survive with just Cameron\nand Dawn there…":
-           [["1) Good luck!", 1], 
-            ["2) It's not that bad.", 3],
+           [["1) Good luck!", 2], 
+            ["2) It's not that bad.", 2],
             ["3) Okay, Sock.", 2]],
            "ENDINGS:":
            [["I mean… I could also just stay at my own house and pretend to be sick… I think\nI’m gonna do that. See you at the next one {player_name}.", 2], 
