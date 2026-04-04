@@ -359,22 +359,21 @@ def Menuscreen() -> None:
     MainScore.clear()
     answered_questions.clear()
     Menu_text: str = """
-                ┌── ⋆⋅☆⋅⋆ ──.·:*¨༺ ☾ ༻¨*:·.── ⋆⋅☆⋅⋆ ──┐
-
-
+                            
                             Stay Home Moon
-
+                            
+                            
                             Play
                             Set Name
                             Friends Count
                             Load
                             Exit
-                
-                
-                └── ⋆⋅☆⋅⋆ ──•,¸,.·'  '·.,¸,•── ⋆⋅☆⋅⋆ ──┘
-        """
+
+    """
     #ascii pattern made from https://www.aestheticsymbols.me/dot.html
+    print(Fore.MAGENTA + "            ┌── " + Fore.YELLOW + "⋆⋅☆⋅⋆ " + Fore.MAGENTA + "──.·:*¨༺ " + Fore.YELLOW + "☾" + Fore.MAGENTA + " ༻¨*:·.── " + Fore.YELLOW + "⋆⋅☆⋅⋆" + Fore.MAGENTA + " ──┐")
     print(Menu_text)
+    print(Fore.MAGENTA + "            └── " + Fore.YELLOW + "⋆⋅☆⋅⋆" + Fore.MAGENTA + " ──•,¸,.·'  '·.,¸,•── " + Fore.YELLOW + "⋆⋅☆⋅⋆" + Fore.MAGENTA + " ──┘")
     while True:
         try: #this is for input validation
 
