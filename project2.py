@@ -103,8 +103,7 @@ def checkpoint_execute() -> tuple[str, list[tuple[float,...], tuple[int,...]]]:
             file = fs.read().split("\n")
             file.pop(-1)
             if len(file) < 1:
-                print(Fore.RED + "Nothing to load. . .")
-                sleep(2)
+                print(Fore.RED + "Nothing to load. . .\n")
                 return None, None
             temp_check_list = file
             for i in range(len(file)):
@@ -123,13 +122,13 @@ def checkpoint_execute() -> tuple[str, list[tuple[float,...], tuple[int,...]]]:
                     ckey, csc1, cq1 = c_vals
                     player_name = ckey[ckey.find("\\")+1:]
                     ckey = ckey[:-len(player_name)-1].upper()
-                    checkpoint_dictionary[ckey] = [(float(csc1)), (int(cq1))]    
+                    checkpoint_dictionary[ckey] = [(float(csc1)), (int(cq1))]    #if you see this, please explain why I cant do tuple(float(csc1))... keeps saying its not iterable
                 else:
                     print(Fore.RED + "ERROR how did this happen.... must be buggy code" + Style.RESET_ALL)
                     exit()
     except FileNotFoundError:
-        print(Fore.RED + "Nothing to load. . .")
-        sleep(2)     
+        print(Fore.RED + "Nothing to load. . .\n")     
+        return None, None
 
     print(Fore.CYAN + "Where do you want to start at?")
 
@@ -212,6 +211,7 @@ def character_selection(num_of_friends: int, character_picked: int, charcter_sco
     """
 
     list_num: list[int]= [1,2,3]
+    char_list = ['Cameron', 'Dawn', 'Sock']
     if num_of_friends < 3:
         if num_of_friends == 2: #switches the person you are calling if you only have 2 friends
             if 0.0 < charcter_scores[character_picked-2] < 1.0: 
@@ -223,14 +223,20 @@ def character_selection(num_of_friends: int, character_picked: int, charcter_sco
             print("Redialing...")
             return character_picked
         if num_of_friends == 1: #this skips picking the person if you only have 1 friend
-            return int(1)
+            character_picked = 1
+            return character_picked
 
     #will only reach here if you have 3 friends selected
-    list_num.remove(int(character_picked))
-    for value in list_num: #restricts character picked to only ones with questions left to be answered
-        if answered_questions[value-1] >= 30:
-            list_num.remove(value)
+    if character_picked != 0:    
+        list_num.remove(int(character_picked))
+    else: #this returns 1 for the first character
+        character_picked = 1
+        return character_picked
+    for i in range(len(list_num)-1,-1,-1): #restricts character picked to only ones with questions left to be answered
+        if answered_questions[list_num[i]-1] >= 30:
+            list_num.remove(i+1)
     if len(list_num) == 0:
+        print(Fore.WHITE+"All other friends "+Fore.RED+"wont talk to you right now...\n"+Fore.WHITE+f"Redialing {char_list[character_picked-1]}...")        
         return character_picked
 
 
@@ -252,8 +258,10 @@ def character_selection(num_of_friends: int, character_picked: int, charcter_sco
     
     while True:
         try: 
-            character_picked = int(input(Fore.BLACK + f"Which character would you like to call next? Type {anslenstr} to choose.\n"+ Fore.WHITE +"-> ")) 
-            if character_picked not in list_num: 
+            character_picked_new = input(Fore.BLACK + f"Which character would you like to call next? Type {anslenstr} to choose. or \"exit\" to exit\n"+ Fore.WHITE +"-> ") 
+            if "EX" in character_picked_new.upper():
+                exit_fun()
+            if int(character_picked_new) not in list_num: 
                 raise ValueError
             break
         except ValueError:
@@ -261,6 +269,7 @@ def character_selection(num_of_friends: int, character_picked: int, charcter_sco
     if character_picked == None:
         print(Fore.RED + "How did this happen\nexiting code" + Style.RESET_ALL)
         exit()
+    character_picked = int(character_picked_new)
     
     return character_picked
 
@@ -282,23 +291,23 @@ def NextQuestion(friend_num: int, answered_questions_list: list[int]) -> tuple[s
     question: str = ""
     answers: list = []
     answered_ques_friend = answered_questions_list[friend_num-1]
-    keys_dict_friend = None
-    dict_friend = None
-    if friend_num == 1:
-        keys_dict_friend = person1keys
-        dict_friend = person1
-    elif friend_num == 2:
-        keys_dict_friend = person2keys
-        dict_friend = person2
-    elif friend_num == 3:
-        keys_dict_friend = person3keys
-        dict_friend = person3    
-    else:
-        print(Fore.RED + "error" + Style.RESET_ALL)
-        exit()
-
-    question = question + str(keys_dict_friend[answered_ques_friend])
-    answers = dict_friend[question]
+    try:
+        if friend_num == 1:
+            question = question + str(person1keys[answered_ques_friend])
+            answers = person1[question]
+        elif friend_num == 2:
+            question = question + str(person2keys[answered_ques_friend])
+            answers = person2[question]
+        elif friend_num == 3:
+            question = question + str(person3keys[answered_ques_friend])
+            answers = person3[question]          
+        else:
+            print(Fore.RED + "error" + Style.RESET_ALL)
+            print(checkp_score)
+            exit()
+    except IndexError:
+        print("This is index out of bounds error. Friend num = ", friend_num)
+        print(checkp_score)
 
 
     return(question, answers)
@@ -344,10 +353,23 @@ def VictoryConditions(scores: list[float]) -> int:
     #scores larger than 100 are victory conditions
     return Endgametype
 
+def sleep_func(n: int) -> None:
+    """checks if debug mode is enabled (true/false value) in main block
+
+    Args:
+        n (int): int for how long to sleep
+    """
+    global debugmode
+    if debugmode == True:
+        return
+    else:
+        sleep(n)
+        return
+
 
 #game functions
 def WholeProgram() -> None:
-    """Combines Menuscreen and Retry game into one function for seemless retrying
+    """Endlessly repeats menuscreen
 
     Returns:
         None: none
@@ -366,7 +388,6 @@ def Menuscreen() -> None:
     player_name: str = ""
     nonamechecknum: int = 2
     numofPeople: int = 3
-    no_checkpoints = False
     startval: float = 0.50 #this changes the starting number in MainScore. This is for us to tinker with to adjust difficulty/game length
     Menu_text: str = """
                             
@@ -397,15 +418,14 @@ def Menuscreen() -> None:
                     if nonamechecknum == 0: #this is a funny easteregg
                         print(Fore.CYAN + "Fine, name has been set to 'Billybob'. You win")
                         player_name = "Billybob"
-                        sleep(2)
-                        StartGame(player_name, startval, numofPeople)
-                        break
+                        sleep_func(2)
+                        return StartGame(player_name, startval, numofPeople)
                     else:
                         print("Please set a name first")
                         nonamechecknum -= 1
                 else:
-                    StartGame(player_name, startval, numofPeople)
-                    break
+                    return StartGame(player_name, startval, numofPeople)
+
             elif "NA" in menuinput:
                 player_name = nameSet(player_name)
             elif "FR" in menuinput: #sets friends
@@ -414,8 +434,6 @@ def Menuscreen() -> None:
                 checkpoint = checkpoint_execute()
                 player_name, game_vals = checkpoint
                 if (not player_name or not game_vals): #I think this will work, it checks if the bool(value) equals false
-                    if game_vals is None:
-                        no_checkpoints = True
                     break
                 if type(game_vals[0]) is float:
                     MainScore.append(game_vals[0])
@@ -427,8 +445,8 @@ def Menuscreen() -> None:
                         answered_questions.append(i)
                 global loaded_checkpoint
                 loaded_checkpoint = True
-                MainGame(player_name)
-                break
+                return MainGame(player_name)
+
             elif "EX" in menuinput: #exits program
                 exit_fun()
             else: #this is for wrong inputs not caught
@@ -495,15 +513,15 @@ def StartGame(name: str, startval: float, numpeople: int) -> None:
     
     
     print(Intro_text1)
-    sleep(4)
+    sleep_func(4)
     print(introtex2)
-    sleep(3)
+    sleep_func(3)
     print(introtex3)
-    sleep(2)
+    sleep_func(2)
     print(introtex5)
-    sleep(4)
+    sleep_func(4)
     print(introtext6)
-    sleep(4)
+    sleep_func(4)
     if len(MainScore) == 0: #assigns startval for each friend. wont work if mainscore has somthing in it - possible error there
         for i in range(numpeople):
             MainScore.append(startval)
@@ -523,7 +541,7 @@ def StartGame(name: str, startval: float, numpeople: int) -> None:
         except ValueError:
             print(Fore.RED + "Invalid input, please type exactly \"1\" or \"2\"")
     print(Fore.CYAN + "\nPicking up the call in 3...\n2...\n1...")
-    sleep(1)
+    sleep_func(1)
     MainGame(name) #this goes into the main game
         #block was found in stackoverflow: https://stackoverflow.com/questions/41832613/python-input-validation-how-to-limit-user-input-to-a-specific-range-of-integers
 
@@ -557,7 +575,7 @@ def Tutorial() -> None:
 
     You should really pick up that phone now, Cameron’s waiting, good luck!\n"""
     print(Fore.WHITE + Tut_text)
-    sleep(2)
+    sleep_func(2)
 
 def MainGame(name: str) -> None:
     """Main block of code for game. Runs the game until a victory condition is reached
@@ -575,7 +593,7 @@ def MainGame(name: str) -> None:
     #The guts of our game! Takes in the Player name, and then calls the helper functions to complete the processes in the game!
     VictoryCond: int = 0
     player_name: str = name
-    friend_number: int = 1
+    friend_number: int = 0
     num_of_friends = len(MainScore)
     numquestions: int = 30 * num_of_friends
     questionnumber: int = sum(answered_questions)
@@ -594,7 +612,7 @@ def MainGame(name: str) -> None:
             print(Fore.MAGENTA + "──" + Fore.YELLOW + " ⋆⋅☆⋅⋆ " + Fore.MAGENTA + "──.·:*¨༺" + Fore.YELLOW + " ☾ " + Fore.MAGENTA + "༻¨*:·.──" + Fore.YELLOW + " ⋆⋅☆⋅⋆ " + Fore.MAGENTA + "──" + Fore.CYAN + f"\n\n{numquestions - questionnumber} questions remain\n")
         else:
             print(Fore.CYAN + f"Final Question")
-        sleep(1.5)
+        sleep_func(1.5)
         lonegest_newline_length = max(curquestion.split("\n"), key=len)
         dash_str = ""
         for idx in range(0,len(lonegest_newline_length)-4,2):
@@ -604,12 +622,12 @@ def MainGame(name: str) -> None:
         for i in curquestion.split("\n"):
             print(Fore.BLUE +"  "+ i)
         print(Fore.RED+ "└──" + Fore.BLACK + dash_str + Fore.RED+"──┘\n")
-        sleep(2)
+        sleep_func(2)
         
         for i in range(len(curanswers)): #prints answers out
             print(Fore.WHITE + curanswers[i][0])
             anslenlist.append(i+1)
-            sleep(0.5)
+            sleep_func(0.5)
         for i in range(len(anslenlist)):
             anslenstr = anslenstr + str(anslenlist[i]) + ", "
         anslenstr = anslenstr[:-3] + f"or {anslenlist[-1]}"
@@ -633,7 +651,7 @@ def MainGame(name: str) -> None:
             print()
         CurAnswScore = ScoreAnswer(curanswers[choice-1][1])
         answered_questions[friend_number - 1] += 1
-        MainScore[friend_number-1] = round(MainScore[friend_number-1] + CurAnswScore, 3) #this is to stop floating point weirdness
+        MainScore[friend_number-1] = round(MainScore[friend_number-1] + CurAnswScore, 4) #this is to stop floating point weirdness
         friend_name_list = ["Cameron", "Dawn", "Sock"]
         color_val = str(MainScore[friend_number-1])
         badendtxt = ""
@@ -652,22 +670,22 @@ def MainGame(name: str) -> None:
 
         print (Fore.CYAN + f"\n{friend_name_list[friend_number-1]} is at {color_val}" + Fore.CYAN + " friendship points")
         print(badendtxt,end="")
-        sleep(1)
+        sleep_func(1)
 
 
 
-        if (MainScore[friend_number-1] <= 0) or (MainScore[friend_number-1] >= 1): 
+        if (MainScore[friend_number-1] <= 0.0) or (MainScore[friend_number-1] >= 1.0): 
             answered_questions[friend_number - 1] = 30
         elif MainScore[friend_number-1] <= 0.25:
             print("Warning! Your friend is growing concerned!")
         elif MainScore[friend_number-1] >= 0.75:
             print("Warning! Hatred is seeping through your friend!")
-        sleep(2)
+        sleep_func(2)
 
         if (sum(answered_questions) % 6 == 0) and num_of_friends != 1:
             char_list = ['Cameron', 'Dawn', 'Sock']
             print(f"\nCall ended with {char_list[friend_number-1]}")        
-            sleep(1)
+            sleep_func(1)
         print("\n\n")
         questionnumber: int = sum(answered_questions)
         checkpoint_loaded_ques_num += 1
@@ -782,9 +800,9 @@ def EndingGame(victory: int, player_name: str) -> None:
             print("unknown ending...\n...\n..")
             print("bugged code srry")
 
-    sleep(2)
+    sleep_func(2)
     print(Fore.CYAN + "Game end\n...\n...\n...\n\n\n\n")
-    sleep(2)
+    sleep_func(2)
     exit_fun(True)
     
     checkp_score.clear()
@@ -1213,6 +1231,10 @@ if __name__ == '__main__':
         ["I just… I really need my people around for things to be okay. I guess you\nweren’t one of my people.", 3],
         ["I know you said not to come over and all but I think hanging out with you\ntonight would be a lot less stressful. You won’t even know I’m there and I can\npay for pizza or something. See you later!", 1]]} 
     person3keys = list(person3.keys())
+
+    #change this to false when sending to prof
+    debugmode = True
+
 
     checkp_score: dict[str, list[tuple[float,...], tuple[int,...]]] = {} #scores for people, index of questions answered
     MainScore = [] #idx+1 equals the number of friends you are conversing with, currently only one friend is available. will be in form [pers1, pers2,...,persX]   
