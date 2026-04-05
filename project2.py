@@ -201,77 +201,81 @@ def define_likeability(score: float) -> str:
 def character_selection(num_of_friends: int, character_picked: int, charcter_scores: list[float]) -> int:
     """Allows the user to pick what character to talk to next. If num_of_friends is below 3, it has alternate logic
 
-    Args:
-        num_of_friends (int): The number of friends picked in the main menu for difficulty
-        character_picked (int): The character that the player wants to tak to next
-        charcter_scores (list[float]): Current scores for all characters
+        Args:
+            num_of_friends (int): The number of friends picked in the main menu for difficulty
+            character_picked (int): The character that the player wants to tak to next
+            charcter_scores (list[float]): Current scores for all characters
 
-    Returns:
-        int: The next character chosen for dialoge
-    """
-
-    list_num: list[int]= [1,2,3]
-    char_list = ['Cameron', 'Dawn', 'Sock']
-    if num_of_friends < 3:
-        if num_of_friends == 2: #switches the person you are calling if you only have 2 friends
-            if 0.0 < charcter_scores[character_picked-2] < 1.0: 
-                if character_picked == 2:
-                    print("Now Calling Cameron...")
+        Returns:
+            int: The next character chosen for dialoge
+        """
+    try:
+        list_num: list[int]= [1,2,3]
+        char_list = ['Cameron', 'Dawn', 'Sock']
+        if num_of_friends < 3:
+            if num_of_friends == 2: #switches the person you are calling if you only have 2 friends
+                if 0.0 < charcter_scores[character_picked-2] < 1.0: 
+                    if character_picked == 2:
+                        print("Now Calling Cameron...")
+                        return (character_picked%2)+1
+                    print("Now Calling Dawn...")
                     return (character_picked%2)+1
-                print("Now Calling Dawn...")
-                return (character_picked%2)+1
-            print("Redialing...")
+                print("Redialing...")
+                return character_picked
+            if num_of_friends == 1: #this skips picking the person if you only have 1 friend
+                character_picked = 1
+                return character_picked
+
+        #will only reach here if you have 3 friends selected
+        if character_picked != 0:    
+            list_num.remove(int(character_picked))
+        else: #this returns 1 for the first character
+            if answered_questions[0] < 30:
+                character_picked = 1
+                return character_picked
+        for i in range(len(list_num)-1,-1,-1): #restricts character picked to only ones with questions left to be answered
+            if answered_questions[list_num[i]-1] >= 30:
+                list_num.remove(i+1)
+        if len(list_num) == 0:
+            print(Fore.WHITE+"All other friends "+Fore.RED+"wont talk to you right now...\n"+Fore.WHITE+f"Redialing {char_list[character_picked-1]}...")        
             return character_picked
-        if num_of_friends == 1: #this skips picking the person if you only have 1 friend
-            character_picked = 1
-            return character_picked
 
-    #will only reach here if you have 3 friends selected
-    if character_picked != 0:    
-        list_num.remove(int(character_picked))
-    else: #this returns 1 for the first character
-        character_picked = 1
+
+        person_info: dict[str] = {"Cameron": "He is suprisingly normal compared to your other friends\n(515) 602-6027\n",
+                                "Don": "He is very abrasive and difficult but has very good social connections\n(603) 502-6015\n", 
+                                "Sock": "They can be very anxious and high maintence sometimes but can make a mean pumpkin pie\n(703) 503-6029\n"}
+        
+
+        if 1 in list_num: 
+            print("Cameron \n\n"+Fore.WHITE+f"{person_info['Cameron']}{define_likeability(charcter_scores[0])}\n" + Fore.BLACK + "Type 1 to choose\n------------------------------------------")
+        if 2 in list_num: 
+            print("Dawn \n\n"+Fore.WHITE+f"{person_info['Don']}{define_likeability(charcter_scores[1])}\n" + Fore.BLACK + "Type 2 to choose\n------------------------------------------")
+        if 3 in list_num: 
+            print("Sock \n\n"+Fore.WHITE+f"{person_info['Sock']}{define_likeability(charcter_scores[2])}\n" + Fore.BLACK + "Type 3 to choose\n------------------------------------------")
+        if len(list_num) == 1:
+            anslenstr= f"{list_num[0]}"
+        else:
+            anslenstr = f"{list_num[0]}, or {list_num[1]}"
+        
+        while True:
+            try: 
+                character_picked_new = input(Fore.BLACK + f"Which character would you like to call next? Type {anslenstr} to choose. or \"exit\" to exit\n"+ Fore.WHITE +"-> ") 
+                if "EX" in character_picked_new.upper():
+                    exit_fun()
+                if int(character_picked_new) not in list_num: 
+                    raise ValueError
+                break
+            except ValueError:
+                print(Fore.RED + "That wasn't an option!") 
+        if character_picked == None:
+            print(Fore.RED + "How did this happen\nexiting code" + Style.RESET_ALL)
+            exit()
+        character_picked = int(character_picked_new)
+        
         return character_picked
-    for i in range(len(list_num)-1,-1,-1): #restricts character picked to only ones with questions left to be answered
-        if answered_questions[list_num[i]-1] >= 30:
-            list_num.remove(i+1)
-    if len(list_num) == 0:
-        print(Fore.WHITE+"All other friends "+Fore.RED+"wont talk to you right now...\n"+Fore.WHITE+f"Redialing {char_list[character_picked-1]}...")        
-        return character_picked
-
-
-    person_info: dict[str] = {"Cameron": "He is suprisingly normal compared to your other friends\n(515) 602-6027\n",
-                              "Don": "He is very abrasive and difficult but has very good social connections\n(603) 502-6015\n", 
-                              "Sock": "They can be very anxious and high maintence sometimes but can make a mean pumpkin pie\n(703) 503-6029\n"}
-    
-
-    if 1 in list_num: 
-        print("Cameron \n\n"+Fore.WHITE+f"{person_info['Cameron']}{define_likeability(charcter_scores[0])}\n" + Fore.BLACK + "Type 1 to choose\n------------------------------------------")
-    if 2 in list_num: 
-        print("Dawn \n\n"+Fore.WHITE+f"{person_info['Don']}{define_likeability(charcter_scores[1])}\n" + Fore.BLACK + "Type 2 to choose\n------------------------------------------")
-    if 3 in list_num: 
-        print("Sock \n\n"+Fore.WHITE+f"{person_info['Sock']}{define_likeability(charcter_scores[2])}\n" + Fore.BLACK + "Type 3 to choose\n------------------------------------------")
-    if len(list_num) == 1:
-        anslenstr= f"{list_num[0]}"
-    else:
-        anslenstr = f"{list_num[0]}, or {list_num[1]}"
-    
-    while True:
-        try: 
-            character_picked_new = input(Fore.BLACK + f"Which character would you like to call next? Type {anslenstr} to choose. or \"exit\" to exit\n"+ Fore.WHITE +"-> ") 
-            if "EX" in character_picked_new.upper():
-                exit_fun()
-            if int(character_picked_new) not in list_num: 
-                raise ValueError
-            break
-        except ValueError:
-            print(Fore.RED + "That wasn't an option!") 
-    if character_picked == None:
-        print(Fore.RED + "How did this happen\nexiting code" + Style.RESET_ALL)
-        exit()
-    character_picked = int(character_picked_new)
-    
-    return character_picked
+    except ValueError:
+        print(character_picked, "value error somehow")
+        exit_fun()
 
 def NextQuestion(friend_num: int, answered_questions_list: list[int]) -> tuple[str, list]:
     """Function gets the next question-answer pair in the dictionary of the passed friend_num
@@ -409,7 +413,7 @@ def Menuscreen() -> None:
         try: #this is for input validation
 
             menuinput: str = input(Fore.BLACK + "What do you want to do? Type \"Play\", \"Name\", \"Friends\", \"Load\", or \"Exit\"\n"+ Fore.WHITE +"-> ").upper()
-            inputcheck: list = ["PL", "NA", "FR", "LO", "EX"] #checking substrings for higher chance of getting right thing
+            inputcheck: list = ["PL", "NA", "FR", "LO", "EX", "DEBUG"] #checking substrings for higher chance of getting right thing
             
             if any(substring in menuinput for substring in inputcheck) == False:
                 raise ValueError
@@ -449,6 +453,15 @@ def Menuscreen() -> None:
 
             elif "EX" in menuinput: #exits program
                 exit_fun()
+            elif "DEBUG" in menuinput:
+                debugval = input("Do you want to engage debug mode? This will turn off all 'sleep' statements. Y/n\n-> ").upper()
+                if "Y" in debugval:
+                    print("Debug mode enabled")
+                    global debugmode
+                    debugmode = True
+                    player_name = "debugname"
+                    print("set name to 'debugname'")
+
             else: #this is for wrong inputs not caught
                 print(Fore.RED + "how did you get here. bad !!@%$@#@#!!!$#@#@#@\n" + Style.RESET_ALL)
                 exit()
@@ -1227,13 +1240,13 @@ if __name__ == '__main__':
         ["2) It's not that bad.", 2],
         ["3) Okay, Sock.", 3]],
         "Sock: Come on, I just wanted a friend to go with me..":
-        [["I mean… I could also just stay at my own house and pretend to be sick… I think\nI’m gonna do that...", 2], 
-        ["I just… I really need my people around for things to be okay. I guess you\nweren’t one of my people.", 3],
-        ["I know you said not to come over and all but I think hanging out with you\ntonight would be a lot less stressful. You won’t even know I’m there and I can\npay for pizza or something. See you later!", 1]]} 
+        [["1) I mean… I could also just stay at my own house and pretend to be sick… I think\nI’m gonna do that...", 2], 
+        ["2) I just… I really need my people around for things to be okay. I guess you\nweren’t one of my people.", 3],
+        ["3) I know you said not to come over and all but I think hanging out with you\ntonight would be a lot less stressful. You won’t even know I’m there and I can\npay for pizza or something. See you later!", 1]]} 
     person3keys = list(person3.keys())
 
     #change this to false when sending to prof
-    debugmode = True
+    debugmode = False
 
 
     checkp_score: dict[str, list[tuple[float,...], tuple[int,...]]] = {} #scores for people, index of questions answered
