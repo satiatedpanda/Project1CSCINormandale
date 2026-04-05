@@ -5,7 +5,11 @@ from platform import system
 from math import floor
 
 """
-Docstring for project 1
+Docstring for project 2
+
+Colorama library will need to be installed for full experience. See sources here:
+https://pypi.org/project/colorama/
+https://www.geeksforgeeks.org/python/introduction-to-python-colorama/
 
 Personality types for NPCs:
 Cameron: average joe-type
@@ -59,7 +63,7 @@ def nameSet(person_name: str) -> str:
         try:
             person_name: str = input(Fore.BLACK + "What should we call you?\n" + Fore.WHITE + "-> ").title()
             if ("\\" not in person_name) and (person_name[0]+person_name[-1]).isalnum():     
-                print(Fore.LIGHTGREEN_EX + f"That's a good name, " + Fore.CYAN + person_name + Fore.GREEN +"! Your friends will remember it!\n")
+                print(Fore.LIGHTGREEN_EX + f"That's a good name, " + Fore.CYAN + person_name + Fore.LIGHTGREEN_EX +"! Your friends will remember it!\n")
                 break
             else:
                 raise ValueError
@@ -395,14 +399,14 @@ def Menuscreen() -> None:
     startval: float = 0.50 #this changes the starting number in MainScore. This is for us to tinker with to adjust difficulty/game length
     Menu_text: str = """
                             
-                            Stay Home Moon
+                        Stay Home Moon
                             
                             
-                            Play
-                            Set Name
-                            Friends Count
-                            Load
-                            Exit
+                        Play
+                        Set Name
+                        Friends Count
+                        Load
+                        Exit
 
     """
     #ascii pattern made from https://www.aestheticsymbols.me/dot.html
@@ -553,7 +557,7 @@ def StartGame(name: str, startval: float, numpeople: int) -> None:
             break
         except ValueError:
             print(Fore.RED + "Invalid input, please type exactly \"1\" or \"2\"")
-    print(Fore.CYAN + "\nPicking up the call in 3...\n2...\n1...")
+    print(Style.DIM + "\nPicking up the call in 3...\n2...\n1...")
     sleep_func(1)
     MainGame(name) #this goes into the main game
         #block was found in stackoverflow: https://stackoverflow.com/questions/41832613/python-input-validation-how-to-limit-user-input-to-a-specific-range-of-integers
@@ -622,9 +626,9 @@ def MainGame(name: str) -> None:
         curquestion, curanswers = NextQuestion(friend_number, answered_questions)
         curquestion = curquestion.format(player_name = player_name) #formats the player name into the text
         if numquestions - questionnumber > 1:
-            print(Fore.MAGENTA + "──" + Fore.YELLOW + " ⋆⋅☆⋅⋆ " + Fore.MAGENTA + "──.·:*¨༺" + Fore.YELLOW + " ☾ " + Fore.MAGENTA + "༻¨*:·.──" + Fore.YELLOW + " ⋆⋅☆⋅⋆ " + Fore.MAGENTA + "──" + Fore.CYAN + f"\n\n{numquestions - questionnumber} questions remain\n")
+            print(Fore.MAGENTA + "──" + Fore.YELLOW + " ⋆⋅☆⋅⋆ " + Fore.MAGENTA + "──.·:*¨༺" + Fore.YELLOW + " ☾ " + Fore.MAGENTA + "༻¨*:·.──" + Fore.YELLOW + " ⋆⋅☆⋅⋆ " + Fore.MAGENTA + "──" + Fore.WHITE +Style.DIM + f"\n\n{numquestions - questionnumber} questions remain\n")
         else:
-            print(Fore.CYAN + f"Final Question")
+            print(Fore.YELLOW+ Style.BRIGHT + f"Final Question")
         sleep_func(1.5)
         lonegest_newline_length = max(curquestion.split("\n"), key=len)
         dash_str = ""
@@ -681,7 +685,7 @@ def MainGame(name: str) -> None:
                 color_val = Fore.GREEN + color_val
 
 
-        print (Fore.CYAN + f"\n{friend_name_list[friend_number-1]} is at {color_val}" + Fore.CYAN + " friendship points")
+        print (Style.DIM + f"\n{friend_name_list[friend_number-1]} is at {color_val}" + Style.DIM + " friendship points")
         print(badendtxt,end="")
         sleep_func(1)
 
@@ -793,15 +797,56 @@ def EndingGame(victory: int, player_name: str) -> None:
                                        """+Fore.RED+"""Bad End?
                                 """
 
+    ending12_text: str = Fore.WHITE + """
+                                It was """+Fore.RED+ Style.BRIGHT+ """almost"""+Fore.WHITE+ Style.NORMAL+ """ perfect.
+        
+                     Maybe not""" + Style.BRIGHT + Fore.RED + """ perfect""" +Style.NORMAL+ Fore.WHITE+ """ but it would've been """ +Style.BRIGHT+ Fore.YELLOW+ """okay""" +Style.NORMAL+ Fore.WHITE+ """.
+        
+        You just couldn't pretend things were normal. You couldn't find a way to
+        maintain a middle ground or playful aloofness. You let slip one too
+        many things that raised eyebrows and now... \n""" +Fore.RED+ Style.BRIGHT+ """
+                                  You're here.""" +Fore.WHITE+ Style.NORMAL+ """
+        
+        The night comes and goes in a blur as it typically does for you when
+        you're forced to endure the full moon's deadly whims. You 
+        haven't looked at your messages to see how the party went. There's been
+        more pressing matters to attend to. Namely, the stench of death that
+        once again permeates your home and the dreadful mess you've made.
+        
+        It's not all of your friends but that's no consolidation. There is no
+        acceptable amount of corpses. Only a concealable amount.""" +Fore.RED+ Style.BRIGHT+"""
+        
+        You work to hide your crimes away like they were nothing more than a
+        dirty secret. And not for the first time you wished silver bullets
+        worked on monsters like you the way fairy tales promised they would.
+        
+                                    Bad End""" + Fore.WHITE + Style.NORMAL
+    
+    ending13_text: str = Fore.WHITE + """
+                       Well.... That could've gone """ +Fore.YELLOW+ Style.BRIGHT+ """better"""+Fore.WHITE+ Style.NORMAL+ """.                     
+
+    The night of Johnny's party came and went without any unexpected
+    interruptions. As usual, there was a considerable amount of dog hair to 
+    vacuum up. It's a little embarrassing actually, be glad no one will ever 
+    see what a filthy animal you are.
+    
+    Your phone is considerably quieter as you mill about your \'morning after\'
+    chores. There's some alerts but not as many as what's usually expected 
+    after one of Johnny's ragers.
+    
+    """ +Fore.YELLOW+ Style.BRIGHT+ """Perhaps you should've been kinder when turning down some of your friends.
+    
+                                    Bad End?""" +Fore.WHITE+ Style.NORMAL
+
     match victory:
         case 11: #1.1 condition, flawless victory- all alive, all positive
             print(ending1_text)
 
         case 12: #1.2 condition, atleast one guy died
-            print("atleast one guy died ending")
+            print(ending12_text)
 
         case 13: #1.3 condition, atleast one person hates you but none died
-            print("atleast one guy came to your hates you, but none died ending")
+            print(ending13_text)
 
         case 20: #2 conditions- all eaten
             print(ending2_text)
@@ -814,7 +859,7 @@ def EndingGame(victory: int, player_name: str) -> None:
             print("bugged code srry")
 
     sleep_func(2)
-    print(Fore.CYAN + "Game end\n...\n...\n...\n\n\n\n")
+    print(Style.DIM + "Game end\n...\n...\n...\n\n\n\n")
     sleep_func(2)
     exit_fun(True)
     
@@ -1163,15 +1208,15 @@ if __name__ == '__main__':
         [["1) Odds are no one is staring at you as hard as you think.", 1],
         ["2) Just talk to people, it's not hard.", 3], 
         ["3) Yeah...", 2]],
-        "Sock: I just walk away feeling like I’ve made a giant idiot of myself and now\nthey’re laughing at me with the next person they talk to. \‘Hey see that person\nover there? They’ve never spent a day on earth before.\’":
+        "Sock: I just walk away feeling like I’ve made a giant idiot of myself and now\nthey’re laughing at me with the next person they talk to. ‘Hey see that person\nover there? They’ve never spent a day on earth before.’":
         [["1) Holy catastrophizing Manbat.", 3], 
         ["2) It can be scary putting yourself out there.", 1], 
         ["3) Uhm... you okay buddy?", 2]],
-        "Sock: \‘They probably never leave their house that smells like old mustard,\ntheir friends are all carefully constructed lies assigned by the government,\nand they suck at dancing.\’": 
+        "Sock: ‘They probably never leave their house that smells like old mustard,\ntheir friends are all carefully constructed lies assigned by the government,\nand they suck at dancing.’": 
         [["1) Sock, snap out of it!", 1], 
         ["2) Holy shit dude.", 3], 
         ["3) You do kinda smell like old mustard.", 2]],
-        "Sock: Except the government wouldn’t assign me friends (player_name). You’d all\njust be like… alien surveillance agents here to make sure I don’t spread my\nsocial ineptitude to every actual human on this planet.": 
+        "Sock: Except the government wouldn’t assign me friends. You’d all\njust be like… alien surveillance agents here to make sure I don’t spread my\nsocial ineptitude to every actual human on this planet.": 
         [["1) When was the last time you went outside?", 1], 
         ["2) Yep, we're just the Sock Survelliance Experts.", 2], 
         ["3) No one would waste that kind of effort.", 3]],
@@ -1238,11 +1283,7 @@ if __name__ == '__main__':
         "Sock: I suppose… I guess I can try to find a way to survive with just Cameron\nand Dawn there…":
         [["1) Good luck!", 1], 
         ["2) It's not that bad.", 2],
-        ["3) Okay, Sock.", 3]],
-        "Sock: Come on, I just wanted a friend to go with me..":
-        [["1) I mean… I could also just stay at my own house and pretend to be sick… I think\nI’m gonna do that...", 2], 
-        ["2) I just… I really need my people around for things to be okay. I guess you\nweren’t one of my people.", 3],
-        ["3) I know you said not to come over and all but I think hanging out with you\ntonight would be a lot less stressful. You won’t even know I’m there and I can\npay for pizza or something. See you later!", 1]]} 
+        ["3) Okay, Sock.", 3]]} 
     person3keys = list(person3.keys())
 
     #change this to false when sending to prof
