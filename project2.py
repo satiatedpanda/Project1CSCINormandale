@@ -54,7 +54,7 @@ def nameSet(person_name: str) -> str:
     Returns:
         str: new user name
     """
-
+ 
     while True:
         try:
             person_name: str = input(Fore.BLACK + "What should we call you?\n" + Fore.WHITE + "-> ").title()
