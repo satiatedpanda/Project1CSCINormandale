@@ -37,7 +37,7 @@ def friendsCnt(numpep: int) -> int:
     while True:
         try: #this is for input validation
             print(Fore.CYAN + "Difficulty scales on number of people. 1= Easy, 2= Medium, 3= Hard")
-            numpep = int(input(Fore.BLACK + "Enter number of friends: 1,2 or 3. Current value is: " + Fore.CYAN + f"{numpep}\n"+Fore.WHITE+"-> ")) #sets number of people for game              
+            numpep = int(input(Fore.BLACK + "Enter number of friends: 1,2 or 3. Current value is: " + Fore.WHITE + f"{numpep}\n"+Fore.WHITE+"-> ")) #sets number of people for game              
             peoplelist = [1,2,3]
             if numpep not in peoplelist:
                 raise ValueError
@@ -438,6 +438,7 @@ def Menuscreen() -> None:
                 player_name = nameSet(player_name)
             elif "FR" in menuinput: #sets friends
                 numofPeople = friendsCnt(numofPeople)
+                print(Fore.CYAN + "Friends set to " +Fore.WHITE+ str(numofPeople))
             elif "LO" in menuinput:
                 checkpoint = checkpoint_execute()
                 player_name, game_vals = checkpoint
@@ -458,20 +459,18 @@ def Menuscreen() -> None:
             elif "EX" in menuinput: #exits program
                 exit_fun()
             elif "DEBUG" in menuinput:
-                debugval = input("Do you want to engage debug mode? This will turn off all 'sleep' statements. Y/n\n-> ").upper()
-                if "Y" in debugval:
-                    print("Debug mode enabled")
-                    global debugmode
-                    debugmode = True
-                    player_name = "debugname"
-                    print("set name to 'debugname'")
+                print("Debug mode enabled")
+                global debugmode
+                debugmode = True
+                player_name = "debugname"
+                print("set name to 'debugname'")
 
             else: #this is for wrong inputs not caught
                 print(Fore.RED + "how did you get here. bad !!@%$@#@#!!!$#@#@#@\n" + Style.RESET_ALL)
                 exit()
         except ValueError:
             print(Fore.RED + "Invalid input, please type one of the four options\n")    
- 
+
 def StartGame(name: str, startval: float, numpeople: int) -> None:
     """Prints start game text, assigns MainScore starting values, and asks user if they want to start the tutorial
 
@@ -1283,7 +1282,11 @@ if __name__ == '__main__':
         "Sock: I suppose… I guess I can try to find a way to survive with just Cameron\nand Dawn there…":
         [["1) Good luck!", 1], 
         ["2) It's not that bad.", 2],
-        ["3) Okay, Sock.", 3]]} 
+        ["3) Okay, Sock.", 3]],
+        "Sock: This is going to go one of two ways... maybe a fire somewhere in between…":
+        [["1) Just don't make any waffles and you'll be fine.", 2], 
+        ["2) You can do this!", 1],
+        ["3) Send pics of Johnny's house burning.", 3]]} 
     person3keys = list(person3.keys())
 
     #change this to false when sending to prof
