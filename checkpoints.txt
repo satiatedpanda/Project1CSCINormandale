@@ -1,3 +1,2 @@
-matcha\debugname,1.04,0.45,0.5,30,6,0
-dolphin\debugname,1.04,-0.01,0.45,30,30,9
-pickle\debugname,1.04,-0.01,0.79,30,30,21
+bees\debugname,0.41,0.7,6,6
+matcha\debugname,0.1,1.05,12,30

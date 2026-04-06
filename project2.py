@@ -221,11 +221,11 @@ def character_selection(num_of_friends: int, character_picked: int, charcter_sco
             if num_of_friends == 2: #switches the person you are calling if you only have 2 friends
                 if 0.0 < charcter_scores[character_picked-2] < 1.0: 
                     if character_picked == 2:
-                        print("Now Calling Cameron...")
+                        print("\nNow Calling Cameron...\n")
                         return (character_picked%2)+1
-                    print("Now Calling Dawn...")
+                    print("\nNow Calling Dawn...\n")
                     return (character_picked%2)+1
-                print("Redialing...")
+                print("\n\n"+Fore.WHITE+ char_list[character_picked%2]+Fore.RED+" wont talk to you right now...\n"+Fore.WHITE+f"Redialing {char_list[(character_picked-1)%2]}...\n")   
                 return character_picked
             if num_of_friends == 1: #this skips picking the person if you only have 1 friend
                 character_picked = 1
@@ -243,7 +243,7 @@ def character_selection(num_of_friends: int, character_picked: int, charcter_sco
             if answered_questions[list_num[i]-1] >= 30:
                 list_num.remove(list_num[i])
         if len(list_num) == 0:
-            print(Fore.WHITE+"All other friends "+Fore.RED+"wont talk to you right now...\n"+Fore.WHITE+f"Redialing {char_list[character_picked-1]}...")        
+            print("\n\n"+Fore.WHITE+"All other friends "+Fore.RED+"wont talk to you right now...\n"+sleep_func(4)+Fore.WHITE+f"Redialing {char_list[character_picked-1]}...\n")        
             return character_picked
 
 
@@ -277,8 +277,8 @@ def character_selection(num_of_friends: int, character_picked: int, charcter_sco
             print(Fore.RED + "How did this happen\nexiting code" + Style.RESET_ALL)
             exit()
         character_picked = int(character_picked_new)
-        
         return character_picked
+    
     except ValueError as e:
         print(e)
         print(character_picked, "value error somehow")
