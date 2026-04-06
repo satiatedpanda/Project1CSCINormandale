@@ -214,13 +214,15 @@ def character_selection(num_of_friends: int, character_picked: int, charcter_sco
         Returns:
             int: The next character chosen for dialoge
         """
+    
+    #this stuid function was the bane of my existance, was a pain to code, and a huge pain to debug... theres probably still bugs in here too...
     try:
         list_num: list[int]= [1,2,3]
         char_list = ['Cameron', 'Dawn', 'Sock']
         if num_of_friends < 3:
             if num_of_friends == 2: #switches the person you are calling if you only have 2 friends
                 if 0.0 < charcter_scores[character_picked-2] < 1.0: 
-                    if character_picked == 2:
+                    if (character_picked == 2) or (character_picked == 0):
                         print("\nNow Calling Cameron...\n")
                         return (character_picked%2)+1
                     print("\nNow Calling Dawn...\n")
@@ -841,6 +843,7 @@ def EndingGame(victory: int, player_name: str) -> None:
     
                                     Bad End?""" +Fore.WHITE+ Style.NORMAL
 
+    sleep_func(2)
     match victory:
         case 11: #1.1 condition, flawless victory- all alive, all positive
             print(ending1_text)
