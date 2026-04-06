@@ -918,6 +918,7 @@ def exit_fun(go_to_menuscreen=False) -> None:
                         else:
                             print(Fore.RED + "Error, bad code alert!!" + Style.RESET_ALL)
                             exit()
+    checkp_score.clear()
     if go_to_menuscreen == False:
         print(Fore.WHITE + "Thank you for playing\n Exiting Program . . . " + Style.RESET_ALL)
         exit()
