@@ -6,8 +6,9 @@ from random import choice, randint
 """
 
 class Status:
-    def __init__(self, name: str, duration: int, chance_to_remove: float):
-        self.status_type = name
+    def __init__(self, name: str, stype: bool,*, duration: int=3, chance_to_remove: int=20):
+        self.status_name = name
+        self.isgood = stype
         self.duration = duration
         self.chance = chance_to_remove
 
@@ -15,23 +16,7 @@ class Status:
         return str(self)
     
     def __str__(self):
-        return f"Status Type: {self.status_type}, Duration: {self.duration}, Chance To Remove: {self.chance}"
-
-class Abilities:
-    """Class of all abilites in the game - in form
-    """
-    def __init__(self) -> None:
-        self.item = {}
-        self.magic = {}
-
-    def assign_magic(self) -> dict[str, int]:
-        pass
-
-    def assign_items(self) -> dict[str, int]:
-        pass
-
-    def items(self):
-        pass
+        return f"Status Type: {self.status_name}, isGood: {self.isgood}, Duration: {self.duration}, Chance To Remove: {self.chance}"
 
 class Weapon: 
     def __init__(self): 
@@ -99,28 +84,33 @@ class Weapon:
         return f"Weapon Type: {self.weapon_type}, Dmg: {self.dmg}, Accuracy: {self.accuracy}, Crit Chance: {self.crit_chance}"
 
 class Person:
-    def __init__(self, *, title="", health=0, defense=0, magic_proficiency=0):
+    def __init__(self, *, title="", health=0, defense=0, magic_proficiency=0, speed=0):
         self.title = title
         self.max_health = health
         self.health = health
         self.defense = defense #reduces damage taken
+        self.speed = speed
         self.magic_proficiency = magic_proficiency #adds to chance of magic working
         self.status: list[Status] = []
 
     def apply_status_effects(self):
         if len(self.status) > 0:
             for value in self.status:
-                match value.status_type:
+                match value.status_name:
                     case "Poison":
                         self.health -= int(self.max_health * 0.05)
                     case "Paralysis":
-                        self.paralyzed = True
+                        self.paralyzed = True #cant use weapons
                     case "Protect":
                         self.defense += 25
                     case "Burn":
                         self.health -= 10
                     case "Stop":
-                        self.stopped = True
+                        self.stopped = True #cant attack at all
+                    case "Mute":
+                        self.muted = True #cant use magic
+                    case "Fast":
+                        self.speed += 30
                     case _: #catchall
                         print("error, invalid status name")
                 value.duration -= 1
@@ -130,10 +120,12 @@ class Person:
             for value in self.status[:]:
                 if value.duration == 0:
                     self.status.remove(value)
+                    print(f"{value.status_name} Expired")
                 else:
                     remove_val = randint(0,100)
                     if remove_val <= value.chance:
                         self.status.remove(value)
+                        print(f"{value.status_name} Expired randomly")
 
     def get_attributes(self) -> dict[str, object]:
         #found at: https://stackoverflow.com/questions/9058305/getting-attributes-of-a-class
@@ -278,30 +270,51 @@ class Magic:
         #removes bad status effects
         success_val = randint(0,100)
         if success_val <= (person.magic_proficiency + 50):
-            protect_val = ""  
+            positive_effects: list[Status] = []  
             for i in range(len(person.status)):
-                if person.status[i].status_type == "Protect":
-                    protect_val = person.status[i]
+                if person.status[i].isgood == True:
+                    positive_effects.append(person.status[i])
             person.status.clear()
-            if protect_val != "":
-                person.status.append(protect_val)
+            if len(positive_effects) > 0:
+                person.status.extend(positive_effects)
+            print(f"{person.title} Cured all negative effects!")
             return True
         else:
+            print(f"{person.title}'s Cure Failed")
             return False
 
     def Heal(self, person: Person) -> bool:
         #heals user by 20% of max health. 100% chance of success
+        cur_health = person.health
         person.health += int(person.max_health * 0.2)
+        if person.health > person.max_health:
+            person.health = person.max_health
+        delta_health = person.health - cur_health
+        print(f"{person.title} gained {delta_health} health!")
+        return True
 
     def Protect(self, person: Person) -> bool:
         #raises defense
-        person.defense += 20
+        success_val = randint(0,100)
+        if success_val <= (person.magic_proficiency + 80):
+            person.defense += 20
+            print(f"{person.title}'s defense rose by 20!")
+            return True
+        else:
+            print(f"{person.title}'s Protect failed")
+            return False
 
     #offensive
-    def Fireball(self, person: Person) -> bool:
+    def Fireball(self, person: Person, opponent: Person) -> bool:
         #fireball. small chance to inflict burn
-        pass
-    
+        success_val = randint(0,100)
+        if success_val <= (person.magic_proficiency + 65):
+            opponent.health -= randint(40,60) - opponent.defense
+            success_val = randint(0,100)
+            if success_val <= (30 - opponent.magic_proficiency):
+                opponent.status.append(Status("Burn",False))
+            
+
     def Lightning(self, person: Person) -> bool:
         #lightning. chance to inflict paralysis
         pass
@@ -323,6 +336,21 @@ class Magic:
         #chance to make opponent lose a turn
         pass
 
+    def Fast(self, person: Person) -> bool:
+        #increases speed
+        pass
+
+    def Slow(self, person: Person) -> bool:
+        #lowers opponent's speed
+        pass
+
+    def Mute(self, person: Person) -> bool:
+        #chance to make opponent not able to cast spells
+        pass
+
+    def Break(self, person: Person) -> bool:
+        #chance to break items in player inventory - enemy specific
+        pass
 
 
 
