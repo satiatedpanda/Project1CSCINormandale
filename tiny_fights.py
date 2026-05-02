@@ -124,7 +124,7 @@ class Person:
                     case "Poison":
                         self.health -= int(self.max_health * 0.05)
                         print(f"{self.title} is poisoned and lost {int(self.max_health*0.05)} health")
-
+                    case "Paralysis":
                         print(f"{self.title} is paralyzed and cannot use weapons!")
                     case "Protect":
                         self.defense += 25
@@ -134,10 +134,10 @@ class Person:
                         print(f"{self.title} is burning and lost 10 hp! They now have {self.health}hp!")                        
                     case "Fast":
                         self.speed += 30       
-                        print(f"{self.title} has been sped up! Their speed is currently {self.speed}!")                                        
+                        print(f"{self.title} has been sped up! Their speed is currently: {self.speed}!")                                        
                     case "Slow":
                         self.speed -= 30  
-                        print(f"{self.title} is slowed! Their speed is currently  {self.speed}hp!")                           
+                        print(f"{self.title} is slowed! Their speed is currently: {self.speed}!")                           
                     case "Stop":
                         self.stopped = True #cant attack at all
                         print(f"{self.title} is stopped! {value.duration-1} turns remain til this expires")
@@ -168,7 +168,7 @@ class Person:
                     self.status.remove(value)
                     print(f"{value.status_name} Expired randomly")
                 else:
-                    print(f"{self.title} is <{value.status_name}> for {value.duration} more turns")
+                    print(f"{self.title} has <{value.status_name}> for {value.duration} more turns")
 
     def get_attributes(self) -> dict[str, object]:
         #found at: https://stackoverflow.com/questions/9058305/getting-attributes-of-a-class
@@ -241,8 +241,7 @@ class Enemy(Person):
 
     def randomEnemy(self):
         enemy_list = ["Orc", "Wrym", "Hobgoblin", "Troll", "Wolf", "Ogre", "Werewolf", "Shark", "Ghost", "Lich", "Death Eye", "Hydra", "Elemental"]
-        # rand_enemy = choice(enemy_list)
-        rand_enemy = "Wrym"
+        rand_enemy = choice(enemy_list)
         match rand_enemy:
             case "Orc":
                 self.title = "Orc"
@@ -250,6 +249,8 @@ class Enemy(Person):
                 self.health = 150
                 self.speed = 20
                 self.magic_proficiency = 0
+                self.defense = 0
+                self.magic = {}
                 self.items = {"Small_Healing_Potion": 5, "Mega_Healing_Potion": 1, "Stick": 5}
                 self.weapon.assign("Sword")
                 self.ai_type = ["Agressive", "Weapon"]
@@ -285,6 +286,7 @@ class Enemy(Person):
                 self.defense = 40
                 self.speed = 0
                 self.magic_proficiency = 0
+                self.magic = {}
                 self.items = {"Stick": 100}
                 self.weapon.weapon_type = "Club"
                 self.weapon.dmg = 80                
@@ -312,7 +314,8 @@ class Enemy(Person):
                 self.defense = 0
                 self.speed = 5
                 self.magic_proficiency = 3
-                self.magic = {"Instant_Death": 100}      
+                self.magic = {"Instant_Death": 100}   
+                self.items = {}   
                 self.weapon.assign("Fists")
                 self.ai_type = ["Agressive", "Weapon"]
             case "Werewolf":
@@ -334,6 +337,8 @@ class Enemy(Person):
                 self.monster_type = "Sea"                    
                 self.health = 300
                 self.speed = 60
+                self.defense = 0
+                self.magic_proficiency = 0
                 self.magic = {"Mute": 3}
                 self.items = {"Antidote": 2}   
                 self.weapon.weapon_type = "Fins"
@@ -348,7 +353,8 @@ class Enemy(Person):
                 self.defense = 0
                 self.speed = 20
                 self.magic_proficiency = 3
-                self.magic = {"Heal": 3, "Fireball": 10, "Stop": 2, "Slow": 2, "Mute": 2}         
+                self.magic = {"Heal": 3, "Fireball": 10, "Stop": 2, "Slow": 2, "Mute": 2}     
+                self.items = {}    
                 self.weapon.weapon_type = "Haunting"
                 self.weapon.dmg = 50                
                 self.weapon.crit_chance = 30
@@ -389,7 +395,8 @@ class Enemy(Person):
                 self.defense = 20
                 self.speed = 50
                 self.magic_proficiency = 0
-                self.magic = {"Fireball": 10, "Lightning": 10, "Nuke": 3}           
+                self.magic = {"Fireball": 10, "Lightning": 10, "Nuke": 3}     
+                self.items = {}      
                 self.weapon.weapon_type = "Stomp"
                 self.weapon.dmg = 15               
                 self.weapon.crit_chance = 90
@@ -414,6 +421,7 @@ class Enemy(Person):
         attack = False
         action_choice = ""
         has_negative_status = False
+        heal = False
 
         for i in range(len(self.status)):
             if self.status[i].isgood == False:
@@ -427,6 +435,7 @@ class Enemy(Person):
                 attack = True
             elif self.health <= int(0.1 * self.max_health):
                 attack = False
+                heal = True
             elif (self.health <= int(0.25 * self.max_health)) and has_negative_status:
                 attack = False
                 if "Antidote" in self.items.keys():
@@ -444,6 +453,7 @@ class Enemy(Person):
                 attack = True
             elif self.health <= int(0.2 * self.max_health):
                 attack = False
+                heal = True
             elif (self.health <= int(0.5 * self.max_health)) and has_negative_status:
                 attack = False                
                 if ("Cure" in self.magic.keys()) and (self.muted == False):
@@ -492,15 +502,15 @@ class Enemy(Person):
             heal_options = []
             if "Heal" in self.magic.keys():
                 if self.magic["Heal"] > 0:
-                    heal_options.append("HealMagic")
-            if "Mega" in self.items.keys():
+                    heal_options.append("Magic Heal")
+            if "Mega_Healing_Potion" in self.items.keys():
                 if self.items["Mega_Healing_Potion"] > 0:
-                    heal_options.append("Mega_Healing_Potion")
-            if "Small" in self.items.keys():
+                    heal_options.append("Item Mega_Healing_Potion")
+            if "Small_Healing_Potion" in self.items.keys():
                 if self.items["Small_Healing_Potion"] > 0:
-                    heal_options.append("Small_Healing_Potion")
+                    heal_options.append("Item Small_Healing_Potion")
             
-            if len(heal_options) > 0:
+            if (len(heal_options) > 0) and (heal == True):
                 if (self.ai_type[1] == "Magic") and (heal_options == "HealMagic") and (self.muted == False):
                     action_choice = "Magic Heal"
                 else:
@@ -707,10 +717,11 @@ class Magic:
         #chance to lower opponent max health by 7.5%
         success_val = randint(0,100)
         if success_val <= (caster.magic_proficiency * 2 + 30):
+            old_max = opponent.max_health
             opponent.max_health -= int(opponent.max_health * 0.05)
             if opponent.health > opponent.max_health:
                 opponent.health = opponent.max_health
-            print(f"{opponent.title} got Scarred! They permantly lost 5% of their max health")
+            print(f"{opponent.title} got Scarred! They permantly lost 5% of their max health ({old_max} -> {opponent.max_health})")
             return True
         else:
             print(f"{caster.title}'s Scar spell missed!")
@@ -782,7 +793,6 @@ class MainGame:
         self.player: Player
         self.enemy: Enemy
         self.menu_screen()
-        self.exit_game(noexit=True)
 
     def action_select(self, caster: Player | Enemy, opponent: Player | Enemy, action: str) -> None:
         action_list = action.split()
