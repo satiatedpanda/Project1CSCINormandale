@@ -124,14 +124,12 @@ class Person:
                     case "Poison":
                         self.health -= int(self.max_health * 0.05)
                         print(f"{self.title} is poisoned and lost {int(self.max_health*0.05)} health")
-                    case "Paralysis":
-                        print(f"{self.title} is paralyzed and cannot use weapons!")
                     case "Protect":
                         self.defense += 25
                         print(f"{self.title} is protected and gained 25 defense! They now have {self.defense} defense")
                     case "Burn":
                         self.health -= 10
-                        print(f"{self.title} is burning and lost 10 hp! They now have {self.health}hp!")                        
+                        print(f"{self.title} is burning and lost 10 HP! They now have {self.health}HP!")                        
                     case "Fast":
                         self.speed += 30       
                         print(f"{self.title} has been sped up! Their speed is currently: {self.speed}!")                                        
@@ -607,13 +605,16 @@ class Magic:
             
     def Lightning(self, caster: Player | Enemy, opponent: Player | Enemy) -> bool:
         #lightning. chance to inflict paralysis
+        title_boost = 0
+        if "Shark" == opponent.title:
+            title_boost = 2
         success_val = randint(0,100)
         if success_val <= (caster.magic_proficiency + 55):
-            opponent_damage = randint(40,60) - opponent.defense
+            opponent_damage = randint(40,60) * title_boost - opponent.defense
             opponent.health -= opponent_damage
             print(f"{opponent.title} lost {opponent_damage} health!")            
             success_val = randint(0,100)
-            if success_val <= (20 - opponent.magic_proficiency):
+            if success_val <= (20 - opponent.magic_proficiency+ 100*title_boost):
                 opponent.status.append(Status("Paralysis",False,duration=2,chance_to_remove=35))
                 print(f"{opponent.title} got afflicted with Paralysis for 2 turns! They wont be able to use weapons til this expires!")
 
@@ -625,11 +626,11 @@ class Magic:
     def Nuke(self, caster: Player | Enemy, opponent: Player | Enemy) -> bool:
         #high damage, hits caster aswell. Low number of uses
         success_val = randint(0,100)
-        if success_val <= (caster.magic_proficiency + 75):
+        if success_val <= (caster.magic_proficiency * 2 + 35):
             opponet_damage = randint(100,150) - opponent.defense
             opponent.health -= opponet_damage
             print(f"{opponent.title} lost {opponet_damage} health!")
-            caster_damage = randint(50,100) - opponent.defense
+            caster_damage = randint(50,100) - caster.defense
             caster.health -= caster_damage
             print(f"{caster.title} got hit by the shockwave!")
             print(f"{caster.title} lost {caster_damage} health!")
@@ -637,7 +638,7 @@ class Magic:
         else:
             print(f"{caster.title}'s Nuke missed! How does that even happen?!?")
             caster.health -= 5
-            print(f"{caster.title} lost 5hp just from the shock of being that bad!")
+            print(f"{caster.title} lost 5 HP just from the shock of being that bad!")
             return False
 
     #offensive status effects
@@ -646,7 +647,7 @@ class Magic:
         success_val = randint(0,100)
         if success_val <= (caster.magic_proficiency + 70):
             opponent.status.append(Status("Poison", False, duration=6))
-            print(f"{opponent.title} got aflicted with Poison! They will lost 5%hp per turn til it expires!")
+            print(f"{opponent.title} got aflicted with Poison! They will lost 5%HP per turn til it expires!")
             return True
         else:
             print(f"{caster.title}'s Poison spell missed!")
@@ -655,7 +656,8 @@ class Magic:
     def Instant_Death(self, caster: Player | Enemy, opponent: Player | Enemy) -> bool:
         #chance to make an opponent die instantly. very low chance
         success_val = randint(0,100)
-        if success_val <= (caster.magic_proficiency * 2 + 5):
+        max_chance = min(caster.magic_proficiency * 2, 20)
+        if success_val <= (max_chance + 5):
             opponent.health = -100
             print(f"{opponent.title} Died")
             return True
@@ -678,7 +680,7 @@ class Magic:
         #lowers opponent's speed
         success_val = randint(0,100)
         if success_val <= (caster.magic_proficiency + 85):
-            opponent.status.append(Status("Slow", False, duration=1, chance_to_remove=10))
+            opponent.status.append(Status("Slow", False, chance_to_remove=10))
             print(f"{opponent.title} got slowed! They lost 30 speed!")
             return True
         else:
@@ -688,9 +690,9 @@ class Magic:
     def Mute(self, caster: Player | Enemy, opponent: Player | Enemy) -> bool:
         #chance to make opponent not able to cast spells
         success_val = randint(0,100)
-        if success_val <= (caster.magic_proficiency * 2 + 65):
+        if success_val <= (caster.magic_proficiency * 2 + 45):
             opponent.status.append(Status("Mute", False, duration=1))
-            print(f"{opponent.title} got muted! They cannot cast spells till this runs out!")
+            print(f"{opponent.title} got muted! They cannot cast spells!")
             return True
         else:
             print(f"{caster.title}'s Slow spell missed!")
@@ -773,6 +775,7 @@ class Items:
     def Stick(self, caster: Player | Enemy, opponent: Player | Enemy) -> bool:
         success_val = randint(0,100)
         title_boost = 0
+        opponent.weapon.dmg += 2        
         if caster.title == "Toddler":
             title_boost = 30
         if success_val <= 5 + title_boost:
@@ -902,6 +905,111 @@ class MainGame:
             case _:
                 print("Main Action edge case, this should not happen")
                 print(main_action)
+                exit()
+
+    def selection_descriptions(self, main_selection: str, sub_selection: str):
+        
+        match main_selection:
+            case "Attack":
+                print(f"{self.player.weapon}")
+            case "Magic":
+                match sub_selection:
+                    case "Cure":
+                        max_percent = min(100, 2*self.player.magic_proficiency+15)
+                        print(f"---Cure Spell---\nChance to succeed: 50% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Cures all negative status effects\n---Cure Spell---")
+                    case  "Heal":
+                        heal_hp = int(self.player.max_health*0.2)
+                        if heal_hp+self.player.health > self.player.max_health:
+                            heal_hp = self.player.max_health - self.player.health
+                        print(f"---Heal Spell---\nChance to succeed: 100%")
+                        print(f"Description: Heals 20% of max health ({heal_hp}HP)\n---Heal Spell---")
+                    case "Protect":
+                        max_percent = min(100, self.player.magic_proficiency+80)
+                        print(f"---Protect Spell---\nChance to succeed: 80% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Raises defense by 20 \n---Protect Spell---")
+                    case "Fast":
+                        max_percent = min(100, self.player.magic_proficiency+80)
+                        print(f"---Fast Spell---\nChance to succeed: 80% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Raises speed by 30 for 2 turns\n---Fast Spell---")
+                    case "Fireball":
+                        max_percent = min(100, self.player.magic_proficiency+65)
+                        print(f"---Fireball Spell---\nChance to succeed: 65% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Deals between 40-60 dmg, minus enemy defense")
+                        print(f"Extra Effects: Has a 30% chance (minus enemy magic profficiency) to inflict Burn for 3 turns\n---Fireball Spell---")
+                    case "Lightning":
+                        max_percent = min(100, self.player.magic_proficiency+55)
+                        print(f"---Lightning Spell---\nChance to succeed: 55% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Deals between 40-60 dmg, minus enemy defense (+secret effect)")
+                        print(f"Extra Effects: Has a 20% chance (minus enemy magic profficiency) to inflict Paralysis for 2 turns\n---Lightning Spell---")
+                    case "Nuke":
+                        max_percent = min(100, 2*self.player.magic_proficiency+35)
+                        print(f"---Nuke Spell---\nChance to succeed: 35% + 2 * {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Deals between 100-150 dmg, minus enemy defense")
+                        print(f"Extra Effects: Deals 50-100 dmg, minus your defense to yourself as well (+secret effect)\n---Nuke Spell---")
+                    case "Poison":
+                        max_percent = min(100, self.player.magic_proficiency+70)
+                        print(f"---Poison Spell---\nChance to succeed: 70% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Afflicts enemy with Poison for 6 turns, causing them to lose 5% of their max hp per turn\n---Poison Spell---")
+                    case "Instant_Death":
+                        max_percent = min(2*self.player.magic_proficiency, 20) + 5
+                        print(f"---Instant_Death Spell---\nChance to succeed (max of 25%): 5% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Instantly kills opponent\n---Instant_Death Spell---")
+                    case "Stop":
+                        max_percent = min(100, 2*self.player.magic_proficiency+15)
+                        print(f"---Stop Spell---\nChance to succeed: 15% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent loses 2 turns\n---Stop Spell---")
+                    case "Slow":
+                        max_percent = min(100, self.player.magic_proficiency+85)
+                        print(f"---Fast Spell---\nChance to succeed: 85% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent loses 30 speed for 3 turns\n---Fast Spell---")
+                    case "Mute":
+                        max_percent = min(100, 2*self.player.magic_proficiency+45)
+                        print(f"---Stop Spell---\nChance to succeed: 45% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent cannot use magic for 1 turn\n---Stop Spell---")
+                    case "Break":
+                        max_percent = min(100, self.player.magic_proficiency+50)
+                        print(f"---Stop Spell---\nChance to succeed: 50% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent loses all items of 1 random item\n---Stop Spell---")
+                    case "Scar":
+                        max_percent = min(100, 2*self.player.magic_proficiency+30)
+                        print(f"---Stop Spell---\nChance to succeed: 30% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent permantly loses 5% of their Max HP\n---Stop Spell---")
+                    case _:
+                        print("Magic DESCRIPTION edge case, this should not happen")
+                        print(main_selection,sub_selection)
+                        exit()
+            case "Item":
+                match sub_selection:
+                    case "Small_Healing_Potion":
+                        heal_hp = int(self.player.max_health*0.3)
+                        if heal_hp+self.player.health > self.player.max_health:
+                            heal_hp = self.player.max_health - self.player.health
+                        print(f"---Small_Healing_Potion Item---\nChance to succeed: 100%")
+                        print(f"Description: Heals 30% of max health ({heal_hp}HP)\n---Small_Healing_Potion Item---")
+                    case "Mega_Healing_Potion":
+                        heal_hp = int(self.player.max_health*0.3)
+                        if heal_hp+self.player.health > self.player.max_health:
+                            heal_hp = self.player.max_health - self.player.health
+                        print(f"---Mega_Healing_Potion Item---\nChance to succeed: 100%")
+                        print(f"Description: Heals 60% of max health ({heal_hp}HP)\n---Mega_Healing_Potion Item---")
+                    case "Antidote":
+                        print(f"---Antidote Item---\nChance to succeed: 100%")
+                        print(f"Description: Cures all negative status effects\n---Antidote Item---")
+                    case "Grenade":
+                        print(f"---Grenade Item---\nChance to succeed: 90%")
+                        print(f"Description: Deals between 40-60 dmg, minus enemy defense\n---Grenade Item---")
+                    case "Stick":
+                        print(f"---Stick Item---\nChance to succeed: 5%")
+                        print(f"Description: Deals between [obfuscated] dmg, minus enemy defense")
+                        print(f"Extra Effects: Has a 100% chance to annoy your enemy (enemy's dmg goes up by 2)\n---Stick Item---")
+                    case _:
+                        print("Item DESCRIPTION Edge case, this should not happen")
+                        print(main_selection, sub_selection)
+                        exit()             
+            case _:
+                print("Main Selection DESCRIPTION edge case, this should not happen")
+                print(main_selection)
                 exit()
 
     def menu_screen(self) -> None:
@@ -1163,6 +1271,7 @@ class MainGame:
 
                 elif option_chose == "Attack":
                     while True:
+                        self.selection_descriptions(option_chose, "")                             
                         user_input = input("Type 'Y' to confirm you want to attack, or 'B' or 'N' to go back\n-> ").upper()
                         if ("N" in user_input) or ("B" in user_input):
                             break
@@ -1170,7 +1279,7 @@ class MainGame:
                             confirmed_selection = True
                             break
                         else:
-                            print("Inccorct letter(s)")
+                            print("Incorrect letter(s)")
                              
                 elif option_chose ==  "Item":
                     acceptable_input_nums = []                
@@ -1195,7 +1304,8 @@ class MainGame:
                                 raise ValueError
                             else:
                                 while True:
-                                    temp_chosen = list(user_options.keys())[int(user_input)-1]                                    
+                                    temp_chosen = list(user_options.keys())[int(user_input)-1]    
+                                    self.selection_descriptions(option_chose, temp_chosen)                                
                                     user_input = input(f"Type 'Y' to confirm you want to use <{temp_chosen}>, or 'B' or 'N' to go back\n-> ").upper()
                                     if ("N" in user_input) or ("B" in user_input):
                                         break
@@ -1233,6 +1343,7 @@ class MainGame:
                             else:
                                 while True:
                                     temp_chosen = list(user_options.keys())[int(user_input)-1]
+                                    self.selection_descriptions(option_chose, temp_chosen)                                         
                                     user_input = input(f"Type 'Y' to confirm you want to use <{temp_chosen}>, or 'B' or 'N' to go back\n-> ").upper()
                                     if ("N" in user_input) or ("B" in user_input):
                                         break
@@ -1264,7 +1375,7 @@ class MainGame:
                 self.action_select(self.player, self.enemy, player_choice)
                 #effects -> check for winner
                 self.enemy.apply_status_effects()
-                print(f"{self.enemy.title} has {self.enemy.health} hp remaining")                
+                print(f"{self.enemy.title} has {self.enemy.health} HP remaining")                
                 if self.enemy.health <= 0:
                     ending_type = 1
 
@@ -1272,7 +1383,7 @@ class MainGame:
                 self.action_select(self.enemy, self.player, ai_choice)
                 #effects -> check for winner
                 self.player.apply_status_effects()
-                print(f"{self.player.title} has {self.player.health} hp remaining")                   
+                print(f"{self.player.title} has {self.player.health} HP remaining")                   
                 if self.player.health <= 0:
                     ending_type = 2                 
             elif first_player == "Enemy":
@@ -1280,7 +1391,7 @@ class MainGame:
                 self.action_select(self.enemy, self.player, ai_choice)    
                 #effects -> check for winner 
                 self.player.apply_status_effects()
-                print(f"{self.player.title} has {self.player.health} hp remaining")                   
+                print(f"{self.player.title} has {self.player.health} HP remaining")                   
                 if self.player.health <= 0:
                     ending_type = 2
                  
@@ -1289,7 +1400,7 @@ class MainGame:
                 self.action_select(self.player, self.enemy, player_choice)                   
                 #effects -> check for winner              
                 self.enemy.apply_status_effects()           
-                print(f"{self.enemy.title} has {self.enemy.health} hp remaining")                 
+                print(f"{self.enemy.title} has {self.enemy.health} HP remaining")                 
                 if self.enemy.health <= 0:
                     ending_type = 1                  
                        
