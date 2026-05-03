@@ -314,6 +314,7 @@ class Enemy(Person):
                 self.magic = {"Instant_Death": 100}   
                 self.items = {}   
                 self.weapon.assign("Fists")
+                self.weapon.dmg = 50
                 self.ai_type = ["Agressive", "Weapon"]
             case "Werewolf":
                 self.title = "Werewolf"
@@ -388,10 +389,10 @@ class Enemy(Person):
             case "Hydra":
                 self.title = "Hydra"
                 self.monster_type = "Flying"                
-                self.health = 100
-                self.defense = 20
+                self.health = 400
+                self.defense = 10
                 self.speed = 50
-                self.magic_proficiency = 0
+                self.magic_proficiency = 3
                 self.magic = {"Fireball": 10, "Lightning": 10, "Nuke": 3}     
                 self.items = {}      
                 self.weapon.weapon_type = "Stomp"
@@ -640,6 +641,37 @@ class Magic:
             print(f"{caster.title} lost 5 HP just from the shock of being that bad!")
             return False
 
+    def Break(self, caster: Enemy, opponent: Player) -> bool:
+        #chance to break items in player inventory - enemy specific
+        success_val = randint(0,100)
+        if success_val <= (caster.magic_proficiency + 50):
+            if len(opponent.items) == 0:
+                print(f"{opponent.title} is all out of items. Theres none to break!\n\n-- you got lucky this time --\n")
+                return False
+            else:
+                item_names = list(opponent.items.keys())
+                random_item = choice(item_names)
+                del opponent.items[random_item]
+                print(f"All of {opponent.title}'s {random_item}'s got destroyed!")
+                return True
+        else:
+            print(f"{caster.title}'s Break spell missed! Whew.")
+            return False
+
+    def Scar(self, caster: Person, opponent: Person) -> bool:
+        #chance to lower opponent max health by 7.5%
+        success_val = randint(0,100)
+        if success_val <= (caster.magic_proficiency * 2 + 30):
+            old_max = opponent.max_health
+            opponent.max_health -= int(opponent.max_health * 0.05)
+            if opponent.health > opponent.max_health:
+                opponent.health = opponent.max_health
+            print(f"{opponent.title} got Scarred! They permantly lost 5% of their max health ({old_max} -> {opponent.max_health})")
+            return True
+        else:
+            print(f"{caster.title}'s Scar spell missed!")
+            return False        
+
     #offensive status effects
     def Poison(self, caster: Person, opponent: Person) -> bool:
         #posion. high chance to inflict poison
@@ -696,37 +728,6 @@ class Magic:
         else:
             print(f"{caster.title}'s Mute spell missed!")
             return False
-
-    def Break(self, caster: Enemy, opponent: Player) -> bool:
-        #chance to break items in player inventory - enemy specific
-        success_val = randint(0,100)
-        if success_val <= (caster.magic_proficiency + 50):
-            if len(opponent.items) == 0:
-                print(f"{opponent.title} is all out of items. Theres none to break!\n\n-- you got luck this time --\n")
-                return False
-            else:
-                item_names = list(opponent.items.keys())
-                random_item = choice(item_names)
-                del opponent.items[random_item]
-                print(f"All of {opponent.title}'s {random_item}'s got destroyed!")
-                return True
-        else:
-            print(f"{caster.title}'s Break spell missed! Whew.")
-            return False
-
-    def Scar(self, caster: Person, opponent: Person) -> bool:
-        #chance to lower opponent max health by 7.5%
-        success_val = randint(0,100)
-        if success_val <= (caster.magic_proficiency * 2 + 30):
-            old_max = opponent.max_health
-            opponent.max_health -= int(opponent.max_health * 0.05)
-            if opponent.health > opponent.max_health:
-                opponent.health = opponent.max_health
-            print(f"{opponent.title} got Scarred! They permantly lost 5% of their max health ({old_max} -> {opponent.max_health})")
-            return True
-        else:
-            print(f"{caster.title}'s Scar spell missed!")
-            return False        
 
 class Items:
     """Item Functions
@@ -909,7 +910,7 @@ class MainGame:
                 print(main_action)
                 exit()
 
-    def selection_descriptions(self, main_selection: str, sub_selection: str):   
+    def selection_descriptions(self, main_selection: str, sub_selection: str) -> None:   
         match main_selection:
             case "Attack":
                 print(f"{self.player.weapon}")
@@ -1074,10 +1075,8 @@ class MainGame:
                 user_input = input("Do really want to exit? Your progress will be lost 'Y'/'N'\n-> ").upper()
                 if "Y" in user_input:
                     self.exit_game()
-
             elif option_chose == "Continue":
                 confirmed_selection = True                    
-
             elif option_chose == "Attack":
                 while True:
                     self.selection_descriptions(option_chose, "")                             
@@ -1088,8 +1087,7 @@ class MainGame:
                         confirmed_selection = True
                         break
                     else:
-                        print("Incorrect letter(s)")
-                            
+                        print("Incorrect letter(s)")                 
             elif option_chose ==  "Item":
                 acceptable_input_nums = []                
                 user_options = self.player.items
@@ -1127,7 +1125,6 @@ class MainGame:
                             break
                     except ValueError:
                         print("Invalid Input.")  
-
             elif option_chose == "Magic":
                 acceptable_input_nums = [] 
                 user_options = self.player.magic
@@ -1165,7 +1162,6 @@ class MainGame:
                             break
                     except ValueError:
                         print("Invalid Input.")
-
             else:
                 print("option chose error")
                 print(option_chose)
