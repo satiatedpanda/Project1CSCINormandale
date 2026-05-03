@@ -796,6 +796,7 @@ class MainGame:
         self.player: Player
         self.enemy: Enemy
         self.enemies_killed = 0
+        self.endless = False
         self.menu_screen()
 
     def action_select(self, caster: Person, opponent: Person, action: str) -> None:
@@ -961,20 +962,20 @@ class MainGame:
                         print(f"Description: Opponent loses 2 turns\n---Stop Spell---")
                     case "Slow":
                         max_percent = min(100, self.player.magic_proficiency+85)
-                        print(f"---Fast Spell---\nChance to succeed: 85% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
-                        print(f"Description: Opponent loses 30 speed for 3 turns\n---Fast Spell---")
+                        print(f"---Slow Spell---\nChance to succeed: 85% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent loses 30 speed for 3 turns\n---Slow Spell---")
                     case "Mute":
                         max_percent = min(100, 2*self.player.magic_proficiency+45)
-                        print(f"---Stop Spell---\nChance to succeed: 45% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
-                        print(f"Description: Opponent cannot use magic for 1 turn\n---Stop Spell---")
+                        print(f"---Mute Spell---\nChance to succeed: 45% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent cannot use magic for 1 turn\n---Mute Spell---")
                     case "Break":
                         max_percent = min(100, self.player.magic_proficiency+50)
-                        print(f"---Stop Spell---\nChance to succeed: 50% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
-                        print(f"Description: Opponent loses all items of 1 random item\n---Stop Spell---")
+                        print(f"---Break Spell---\nChance to succeed: 50% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent loses all items of 1 random item\n---Break Spell---")
                     case "Scar":
                         max_percent = min(100, 2*self.player.magic_proficiency+30)
-                        print(f"---Stop Spell---\nChance to succeed: 30% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
-                        print(f"Description: Opponent permantly loses 5% of their Max HP\n---Stop Spell---")
+                        print(f"---Scar Spell---\nChance to succeed: 30% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent permantly loses 5% of their Max HP\n---Scar Spell---")
                     case _:
                         print("Magic DESCRIPTION edge case, this should not happen")
                         print(main_selection,sub_selection)
@@ -988,7 +989,7 @@ class MainGame:
                         print(f"---Small_Healing_Potion Item---\nChance to succeed: 100%")
                         print(f"Description: Heals 30% of max health ({heal_hp}HP)\n---Small_Healing_Potion Item---")
                     case "Mega_Healing_Potion":
-                        heal_hp = int(self.player.max_health*0.3)
+                        heal_hp = int(self.player.max_health*0.6)
                         if heal_hp+self.player.health > self.player.max_health:
                             heal_hp = self.player.max_health - self.player.health
                         print(f"---Mega_Healing_Potion Item---\nChance to succeed: 100%")
@@ -1418,20 +1419,28 @@ class MainGame:
         match endings:
             case 1:
                 print("You Won !!")
+                if self.endless == True:
+                    self.enemies_killed += 1
+                    print(f"{self.enemies_killed} killed")                    
+                    self.start_game()
             case 2:
                 print("You lost! ;c")
+                if self.endless == True:
+                    print(f"Total Enemies killed: {self.enemies_killed}!")
             case _:
                 print("ending edge case, this should not happen")
                 print(endings)
                 exit()
-        user_input = input("Do you want to try to fight more monsters? 'Y'/'N'\n-> ").upper()
-        if "Y" in user_input:
-            self.enemies_killed += 1
-            print(self.player)
-            print(f"{self.enemies_killed} killed")
-            self.start_game()
-        else:
-            self.exit_game(noexit=True)
+        if self.endless == False:
+            user_input = input("Do you want to try to fight more monsters? 'Y'/'N'\n-> ").upper()
+            if "Y" in user_input:
+                self.enemies_killed += 1
+                self.endless = True
+                print(self.player)
+                print(f"{self.enemies_killed} killed")
+                self.start_game()
+            else:
+                self.exit_game(noexit=True)
 
     def exit_game(self, noexit=False) -> NoReturn:
         if noexit == False:
