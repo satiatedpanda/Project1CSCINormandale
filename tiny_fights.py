@@ -138,6 +138,11 @@ class Person:
     def apply_status_effects(self) -> None:
         """Applies status effects that are currently afflicting the Person, and lowers the duration by 1 for each status effect
         """
+        self.defense = self.default_defense
+        self.speed = self.default_speed
+        self.paralyzed = False
+        self.muted = False
+        self.stopped = False        
         if len(self.status) > 0:
             for value in self.status:
                 match value.status_name:
@@ -169,17 +174,11 @@ class Person:
                         print("error, invalid status name")
                         print(value.status_name)
                         exit_game()
-                value.duration -= 1
+                sleep_func(1)
 
     def remove_status_effects(self) -> None: #ran right after user picks an option, before apply affects
         """Resets altered stats to base values, and removes status effects that expired
         """
-        self.defense = self.default_defense
-        self.speed = self.default_speed
-        self.paralyzed = False
-        self.muted = False
-        self.stopped = False
-
         if len(self.status)>0:
             for value in self.status[:]: #compares against a copy of the list to not throw errors
                 remove_val = randint(0,100)                 
@@ -191,6 +190,8 @@ class Person:
                     print(f"{self.title}'s <{value.status_name}> Expired randomly")
                 else:
                     print(f"{self.title} has <{value.status_name}> for {value.duration} more turn(s)")
+                    value.duration -= 1
+            sleep_func(1)
     
     def __repr__(self):
         return str(self)
@@ -1072,7 +1073,7 @@ class Items:
         caster.status.clear()
         if len(positive_effects) > 0:
             caster.status.extend(positive_effects)
-        print(f"{caster.title}'s Antidote all negative effects!")
+        print(f"{caster.title}'s Antidote cured all negative effects!")
         return True
 
     def Grenade(self, caster: Person, opponent: Person) -> bool:
@@ -1627,7 +1628,7 @@ class MainGame:
         """
         character = self.character.upper()
         weapon_list = []
-        print("\n\n\n")
+        print("\n")
         print_statement = ""
         match character:
             case "WIZARD":
@@ -1730,15 +1731,17 @@ class MainGame:
             self.player: Player = Player(self.character, self.weapon)
             del self.character
             del self.weapon
-        print("\nYour Player is...")
+        print("\nYour Character is...")
         print("----------------------")
         print(self.player)
         print("----------------------")
+        sleep_func(4)
         self.enemy = Enemy()
         print("\nYour opponent is...")
         print("----------------------")
         print(self.enemy)
         print("----------------------\n\n")     
+        sleep_func(4)
         print("\n_-‾-_-‾-_-‾-_-‾-_\nStarting game...\n‾-_-‾-_-‾-_-‾-_-‾\n")
         self.game()
  
@@ -1749,7 +1752,13 @@ class MainGame:
         turn = 0
         while ending_type == 0:
             turn += 1
+            player_cur_health = self.player.health
+            enemy_cur_health = self.enemy.health
             print(f"\n\n    Turn {turn}:\n---------------")
+            sleep_func(1)
+            print(f"{self.player.title}: {self.player.health}/{self.player.max_health}HP, {self.player.speed} Speed")
+            print(f"{self.enemy.title}: {self.enemy.health}/{self.enemy.max_health}HP, {self.enemy.speed} Speed")            
+            sleep_func(2)
             #get turn order
             first_player = ""
             if self.player.speed < self.enemy.speed:
@@ -1758,75 +1767,98 @@ class MainGame:
                 first_player = choice(["Player", "Enemy"])
             else:
                 first_player = "Player"
+                  
             #do actions
-
             if first_player == "Player":
                 #1st attack
+                #edit choices for round 
+                self.player.remove_status_effects()                       
                 print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                
                 player_choice = self.user_action_select()
                 print()
-                #edit choices for next round                             
+                sleep_func(1)         
                 self.action(self.player, self.enemy, player_choice)
-                self.player.remove_status_effects()                   
-                #effects -> check for winner
-                self.enemy.apply_status_effects()
+                sleep_func(1)
+                #apply status effects -> check for winner
+                self.enemy.apply_status_effects()                                  
                 if self.enemy.health <= 0:
                     print(f"{self.enemy.title} died!")
                     ending_type = 1
                     if self.player.health <= 0:
                         ending_type = 3
-                    break                
-                print(f"{self.enemy.title} has {self.enemy.health}/{self.enemy.max_health} HP remaining")                
+                    break          
+                if self.enemy.health != enemy_cur_health:
+                    print(f"{self.enemy.title} has {self.enemy.health}/{self.enemy.max_health} HP remaining")   
+                if self.player.health != player_cur_health:                        
+                    print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                                   
                 print("-_-_-_-_-_-_-_-_-_-")
 
+                sleep_func(2)
                 #2nd attack
+                #edit choices for round  
+                self.enemy.remove_status_effects()                
                 print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")
-                ai_choice = self.enemy.ai_action() 
-                #edit choices for next round                                            
+                ai_choice = self.enemy.ai_action()                         
+                sleep_func(1.5)             
                 self.action(self.enemy, self.player, ai_choice)
-                self.enemy.remove_status_effects()                   
-                #effects -> check for winner
-                self.player.apply_status_effects()
+                sleep_func(1)
+                #apply status effects -> check for winner
+                self.player.apply_status_effects() 
                 if self.player.health <= 0:
                     ending_type = 2          
                     if self.enemy.health <= 0:
                         ending_type = 3         
                     break                
-                print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                   
+                if self.enemy.health != enemy_cur_health:
+                    print(f"{self.enemy.title} has {self.enemy.health}/{self.enemy.max_health} HP remaining")   
+                if self.player.health != player_cur_health:                        
+                    print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                 
                 print("-_-_-_-_-_-_-_-_-_-\n")                 
             elif first_player == "Enemy":
+                #1st attack
+                #edit choices for round 
+                self.enemy.remove_status_effects()                
                 print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                
-                ai_choice = self.enemy.ai_action()
-                #edit choices for next round                   
+                ai_choice = self.enemy.ai_action()             
+                sleep_func(1.5)     
                 self.action(self.enemy, self.player, ai_choice)
-                self.enemy.remove_status_effects()                  
-                #effects -> check for winner
-                self.player.apply_status_effects()
+                sleep_func(1)
+                #apply status effects -> check for winner
+                self.player.apply_status_effects() 
                 if self.player.health <= 0:
                     ending_type = 2   
                     if self.enemy.health <= 0:
                         ending_type = 3       
                     break                
-                print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                   
+                if self.enemy.health != enemy_cur_health:
+                    print(f"{self.enemy.title} has {self.enemy.health}/{self.enemy.max_health} HP remaining")   
+                if self.player.health != player_cur_health:                        
+                    print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                   
                 print("-_-_-_-_-_-_-_-_-_-\n")                                       
                      
+                sleep_func(2)
                 #2nd attack
+                #edit choices for round 
+                self.player.remove_status_effects()                  
                 print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                 
                 player_choice = self.user_action_select() 
                 print() 
-                #edit choices for next round                                                 
+                sleep_func(1.5)                                               
                 self.action(self.player, self.enemy, player_choice)
-                self.player.remove_status_effects()                 
-                #effects -> check for winner
-                self.enemy.apply_status_effects()
+                sleep_func(1)
+                #apply status effects -> check for winner
+                self.enemy.apply_status_effects() 
                 if self.enemy.health <= 0:
                     ending_type = 1     
                     if self.player.health <= 0:
                         ending_type = 3
                     break                
-                print(f"{self.enemy.title} has {self.enemy.health}/{self.enemy.max_health} HP remaining")                
-                print("-_-_-_-_-_-_-_-_-_-\n")                       
-        
+                if self.enemy.health != enemy_cur_health:
+                    print(f"{self.enemy.title} has {self.enemy.health}/{self.enemy.max_health} HP remaining")   
+                if self.player.health != player_cur_health:                        
+                    print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                 
+                print("-_-_-_-_-_-_-_-_-_-\n")         
+            sleep_func(1)              
         self.ending(ending_type)
 
     def ending(self, endings: int) -> None:
@@ -1835,6 +1867,7 @@ class MainGame:
         Args:
             endings (_type_): Win condition, 1=Win, 2=Lose, 3=Both died (tie) 
         """
+        print("\n\n\n")
         match endings:
             case 1:
                 print("You Won !!")
@@ -1853,7 +1886,8 @@ class MainGame:
                 print("ending edge case, this should not happen")
                 print(endings)
                 exit_game()
-        if self.endless == False:
+        sleep_func(5)
+        if self.endless == False and endings == 1:
             user_input = input("Do you want to try to fight more monsters? 'Y'/'N'\n-> ").upper()
             if "Y" in user_input:
                 self.enemies_killed += 1
@@ -1862,6 +1896,9 @@ class MainGame:
                 self.start_game()
             else:
                 exit_game(noexit=True)
+        else:
+            print("\nGame Over\n")
+            exit_game(noexit=True)
 
 def exit_game(noexit=False) -> NoReturn:
     """Exit game function
@@ -1876,10 +1913,22 @@ def exit_game(noexit=False) -> NoReturn:
         exit()
     print("restarting game...\n")
 
+def sleep_func(n: int | float) -> None:
+    """checks if debug mode is enabled (true/false value) in main block. If yes removes all sleep functions.
 
+    Args:
+        n (int | float): int for how long to sleep
+    """
+    global debugmode
+    if debugmode == True: #this function is the goat, best addition I added. this has saved me HOURS
+        return
+    else:
+        sleep(n)
+        return
 
 
 if __name__ == '__main__':
+    debugmode = False
     while True:
         game = MainGame()
         
