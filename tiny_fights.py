@@ -1713,13 +1713,12 @@ class MainGame:
         while True:
             try:
                 response = input("\n-> ").upper()
-                any((substring in response for substring in imput_check))
-                if any((substring in response for substring in imput_check)): #checks if response
+                if response[0:2] not in imput_check:
+                    raise ValueError
+                else:
                     choice = weapon_list[[idx for idx, string in enumerate(weapon_list) if response[0:2].title() in string][0]]
                     self.weapon.assign(choice)
-                    break
-                else:
-                    raise ValueError
+                    break                
             except ValueError:
                 print("Invalid Input: Please Try Again")     
         self.start_game()                           
