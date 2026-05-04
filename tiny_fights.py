@@ -192,6 +192,7 @@ class Person:
                     print(f"{self.title} has <{value.status_name}> for {value.duration} more turn(s)")
                     value.duration -= 1
             sleep_func(1)
+            print()
     
     def __repr__(self):
         return str(self)
@@ -432,7 +433,7 @@ class Enemy(Person):
                 self.speed = 100
                 self.magic_proficiency = 10
                 self.magic = {"Instant_Death": 100}
-                self.items = {"Heal": 10}
+                self.items = {"Small_Healing_Potion": 10}
                 self.weapon.weapon_type = "Haunting"
                 self.weapon.dmg = 15               
                 self.weapon.crit_chance = 90
@@ -1769,10 +1770,10 @@ class MainGame:
                   
             #do actions
             if first_player == "Player":
-                #1st attack
+                #1st attack                   
+                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")         
                 #edit choices for round 
-                self.player.remove_status_effects()                       
-                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                
+                self.player.remove_status_effects()                 
                 player_choice = self.user_action_select()
                 print()
                 sleep_func(1)         
@@ -1793,10 +1794,10 @@ class MainGame:
                 print("-_-_-_-_-_-_-_-_-_-")
 
                 sleep_func(2)
-                #2nd attack
-                #edit choices for round  
-                self.enemy.remove_status_effects()                
+                #2nd attack               
                 print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")
+                #edit choices for round  
+                self.enemy.remove_status_effects()             
                 ai_choice = self.enemy.ai_action()                         
                 sleep_func(1.5)             
                 self.action(self.enemy, self.player, ai_choice)
@@ -1814,10 +1815,10 @@ class MainGame:
                     print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                 
                 print("-_-_-_-_-_-_-_-_-_-\n")                 
             elif first_player == "Enemy":
-                #1st attack
-                #edit choices for round 
-                self.enemy.remove_status_effects()                
-                print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                
+                #1st attack           
+                print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")    
+                #edit choices for round                     
+                self.enemy.remove_status_effects()                          
                 ai_choice = self.enemy.ai_action()             
                 sleep_func(1.5)     
                 self.action(self.enemy, self.player, ai_choice)
@@ -1832,14 +1833,14 @@ class MainGame:
                 if self.enemy.health != enemy_cur_health:
                     print(f"{self.enemy.title} has {self.enemy.health}/{self.enemy.max_health} HP remaining")   
                 if self.player.health != player_cur_health:                        
-                    print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                   
+                    print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")         
                 print("-_-_-_-_-_-_-_-_-_-\n")                                       
-                     
                 sleep_func(2)
+
                 #2nd attack
+                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")
                 #edit choices for round 
-                self.player.remove_status_effects()                  
-                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                 
+                self.player.remove_status_effects()                                                              
                 player_choice = self.user_action_select() 
                 print() 
                 sleep_func(1.5)                                               
@@ -1881,6 +1882,8 @@ class MainGame:
             case 3:
                 print("You both died!")
                 print("Ties may end up friendly in most games, but here, youre dead.\nYou lost!")
+                if self.endless == True:
+                    print(f"Total Enemies killed: {self.enemies_killed}!")                
             case _:
                 print("ending edge case, this should not happen")
                 print(endings)
