@@ -1935,4 +1935,3 @@ if __name__ == '__main__':
     debugmode = False
     while True:
         game = MainGame()
-        
