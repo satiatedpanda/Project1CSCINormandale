@@ -506,23 +506,19 @@ class Enemy(Person):
                     cure_options.append("Magic Cure")
                 cure_options_len = len(cure_options)
                 if cure_options_len>0:
+                    rand_val = randint(0,100)
                     if cure_options_len == 1:
                         action_choice = cure_options[0]
-                        return action_choice
                     #if len = 2, magic will always be in it
-                    rand_val = randint(0,100)
-                    if self.ai_type[1] == "Magic" and rand_val > 20:
-                        action_choice = "Magic Cure"
-                        return action_choice
                     elif self.ai_type[1] == "Magic" and rand_val > 20:
                         action_choice = "Magic Cure"
-                        return action_choice
                     elif self.ai_type[1] == "Magic" and rand_val > 20:
                         action_choice = "Magic Cure"
-                        return action_choice     
+                    elif self.ai_type[1] == "Magic" and rand_val > 20:
+                        action_choice = "Magic Cure"
                     else:
                         action_choice = "Item Antidote"
-                        return action_choice                                          
+                    return action_choice                                          
             else:
                 attack_val = randint(0,100)
                 if 80 > attack_val:
@@ -542,23 +538,19 @@ class Enemy(Person):
                     cure_options.append("Magic Cure")
                 cure_options_len = len(cure_options)
                 if cure_options_len>0:
+                    rand_val = randint(0,100)
                     if cure_options_len == 1:
                         action_choice = cure_options[0]
-                        return action_choice
                     #if len = 2, magic will always be in it
-                    rand_val = randint(0,100)
-                    if self.ai_type[1] == "Magic" and rand_val > 20:
-                        action_choice = "Magic Cure"
-                        return action_choice
                     elif self.ai_type[1] == "Magic" and rand_val > 20:
                         action_choice = "Magic Cure"
-                        return action_choice
                     elif self.ai_type[1] == "Magic" and rand_val > 20:
                         action_choice = "Magic Cure"
-                        return action_choice     
+                    elif self.ai_type[1] == "Magic" and rand_val > 20:
+                        action_choice = "Magic Cure"     
                     else:
                         action_choice = "Item Antidote"
-                        return action_choice                            
+                    return action_choice                            
             else:
                 attack_val = randint(0,100)
                 if 50 > attack_val:
@@ -586,9 +578,7 @@ class Enemy(Person):
                 action_choice = choice(attack_items)
             else:
                 action_choice = "Item " + choice(items_list)
-            return action_choice
-
-        if attack == True:
+        elif attack == True:
             rand_val = randint(0,100)
             magic_list = list(self.magic.keys())
             items_list = list(self.items.keys())
@@ -670,7 +660,6 @@ class Enemy(Person):
                             action_choice = "Item " + choice(items_list)
                         else:
                             action_choice = "Weapon"
-
             else:
                 items_list = list(self.items.keys())
                 if "Mega_Healing_Potion" in items_list:
@@ -682,7 +671,10 @@ class Enemy(Person):
                 if len(items_list)>0:
                     action_choice = "Item " + choice(items_list)
                 else:
-                    action_choice = "Weapon"
+                    if self.paralyzed == True:
+                        action_choice = "Continue"
+                    else:
+                        action_choice = "Weapon"
         return action_choice
 
     def __repr__(self):
