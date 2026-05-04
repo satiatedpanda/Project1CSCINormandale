@@ -129,7 +129,8 @@ class Person:
         #These regular values can change by effects in the game, so these are used to remember what the original values were
         self.default_speed: int = speed     
         self.default_defense: int = defense           
-        self.max_health: int = health       
+        self.max_health: int = health 
+        self.base_dmg: int = 0      
 
         #edge case if a weapon was not assigned correctly
         if not(hasattr(self.weapon, "weapon_type")):
@@ -140,6 +141,7 @@ class Person:
         """
         self.defense = self.default_defense
         self.speed = self.default_speed
+        self.base_dmg = 0
         self.paralyzed = False
         self.muted = False
         self.stopped = False        
@@ -170,23 +172,43 @@ class Person:
                     case "Mute":
                         self.muted = True #cant use magic
                         print(f"{self.title} is muted! {value.duration} turn(s) remain til this expires")
+                    case "Constrict":
+                        self.defense = max(self.defense-30,0)  
+                        print(f"{self.title} is constricted! Their defense is currently: {self.defense}!")                          
+                    case "Strength":
+                        self.base_dmg += 30  
+                        print(f"{self.title} is strengthened! Their bonus damage is currently: {self.base_dmg}!")        
+                    case "Weakness":
+                        self.base_dmg -= 30  
+                        print(f"{self.title} has been weakened! Their bonus damage is currently: {self.base_dmg}!")                                    
                     case _: #catchall
                         print("error, invalid status name")
                         print(value.status_name)
                         exit_game()
                 sleep_func(1)
 
+    def update_base_setting(self, setting):
+        self.defense = self.default_defense
+        self.speed = self.default_speed
+        self.base_dmg = 0
+        self.paralyzed = False
+        self.muted = False
+        self.stopped = False 
+
     def remove_status_effects(self) -> None: #ran right after user picks an option, before apply affects
         """Resets altered stats to base values, and removes status effects that expired
         """
+
         if len(self.status)>0:
             for value in self.status[:]: #compares against a copy of the list to not throw errors
                 remove_val = randint(0,100)                 
                 if value.duration <= 0:
                     self.status.remove(value)
+                    # self.update_base_setting(value.status_name)
                     print(f"{self.title}'s <{value.status_name}> Expired")
                 elif remove_val <= value.chance:
                     self.status.remove(value)
+                    # self.update_base_setting(value.status_name)                    
                     print(f"{self.title}'s <{value.status_name}> Expired randomly")
                 else:
                     print(f"{self.title} has <{value.status_name}> for {value.duration} more turn(s)")
@@ -226,28 +248,28 @@ class Player(Person):
                 self.speed = 30
                 self.magic_proficiency = 30
                 self.magic = {"Heal": 5, "Slow": 3, "Poison": 3, "Fireball": 4, "Lightning": 4, "Nuke": 2, "Instant_Death": 2, "Scar": 3} 
-                self.items = {"Small_Healing_Potion": 2, "Antidote": 2}
+                self.items = {"Small_Healing_Potion": 2, "Antidote": 2, "Strength": 3}
             case "Waffle House Employee":
                 self.health = 300
                 self.defense = 10 
                 self.speed = 40   
                 self.magic_proficiency = 0               
                 self.magic = {"Cure": 3, "Heal": 3, "Protect": 2, "Fast": 5, "Stop": 2, "Mute": 2, "Poison": 5, "Scar": 3} 
-                self.items = {"Small_Healing_Potion": 3, "Mega_Healing_Potion": 1, "Grenade": 4}
+                self.items = {"Small_Healing_Potion": 3, "Mega_Healing_Potion": 1, "Grenade": 4, "Weakness": 3}
             case "Toddler":
                 self.health = 175
                 self.defense = 0
                 self.speed = 100   
                 self.magic_proficiency = 20                
-                self.magic = {"Protect": 5, "Stop": 2, "Slow": 3, "Mute": 3, "Poison": 2, "Nuke": 3, "Instant_Death": 5, "Scar": 5}
-                self.items = {"Small_Healing_Potion": 5, "Grenade": 4, "Stick": 10}
+                self.magic = {"Protect": 5, "Stop": 2, "Slow": 3, "Mute": 3, "Poison": 2, "Nuke": 3, "Instant_Death": 5, "Scar": 5, "Constrict": 2}
+                self.items = {"Small_Healing_Potion": 5, "Grenade": 4, "Stick": 15, "Weakness": 10}
             case "Rouge":
                 self.health = 200
                 self.defense = 10 
                 self.speed = 70   
                 self.magic_proficiency = 0                
-                self.magic = {"Cure": 2, "Heal": 3, "Protect": 3, "Slow": 3, "Fireball": 2, "Lightning": 2}
-                self.items = {"Mega_Healing_Potion": 3, "Grenade": 4}
+                self.magic = {"Cure": 2, "Heal": 3, "Protect": 3, "Slow": 3, "Fireball": 2, "Lightning": 2, "Constrict": 3}
+                self.items = {"Mega_Healing_Potion": 3, "Grenade": 4, "Strength": 2}
             case _:
                 print("Error, incorrect title")
                 print(self.title)
@@ -300,7 +322,7 @@ class Enemy(Person):
                 self.speed = 20
                 self.magic_proficiency = 0
                 self.defense = 0
-                self.magic = {}
+                self.magic = {"Constrict": 10}
                 self.items = {"Small_Healing_Potion": 5, "Mega_Healing_Potion": 1, "Stick": 5}
                 self.weapon.assign("Sword")
                 self.ai_type = ["Agressive", "Weapon"]
@@ -312,7 +334,7 @@ class Enemy(Person):
                 self.speed = 60
                 self.magic_proficiency = 20
                 self.magic = {"Fireball": 30, "Lightning": 30, "Nuke": 3, "Stop": 2, "Slow": 2, "Mute": 2, "Break": 2, "Scar": 4}
-                self.items = {"Small_Healing_Potion": 2, "Antidote": 2}          
+                self.items = {"Small_Healing_Potion": 2, "Antidote": 2, "Strength": 2, "Weakness": 10}          
                 self.weapon.weapon_type = "Claws"
                 self.weapon.dmg = 60                
                 self.weapon.crit_chance = 12
@@ -336,8 +358,8 @@ class Enemy(Person):
                 self.defense = 40
                 self.speed = 0
                 self.magic_proficiency = 0
-                self.magic = {}
-                self.items = {"Stick": 100}
+                self.magic = {"Constrict": 10}
+                self.items = {"Stick": 100, "Strength": 2}
                 self.weapon.weapon_type = "Club"
                 self.weapon.dmg = 80                
                 self.weapon.crit_chance = 25
@@ -364,7 +386,7 @@ class Enemy(Person):
                 self.defense = 0
                 self.speed = 5
                 self.magic_proficiency = 3
-                self.magic = {"Instant_Death": 100}   
+                self.magic = {"Constrict": 10, "Heal": 10, "Scar": 3}   
                 self.items = {}   
                 self.weapon.assign("Fists")
                 self.weapon.dmg = 50
@@ -377,7 +399,7 @@ class Enemy(Person):
                 self.speed = 30
                 self.magic_proficiency = 10
                 self.magic = {"Cure": 10, "Heal": 10, "Protect": 2, "Fast": 2, "Lightning": 10, "Slow": 1, "Mute": 1, "Scar": 1}
-                self.items = {"Small_Healing_Potion": 10, "Mega_Healing_Potion": 1, "Antidote": 5, "Stick": 4}
+                self.items = {"Small_Healing_Potion": 10, "Mega_Healing_Potion": 1, "Antidote": 5, "Stick": 4, "Weakness": 2}
                 self.weapon.weapon_type = "Claws"
                 self.weapon.dmg = 50                
                 self.weapon.crit_chance = 25
@@ -390,8 +412,8 @@ class Enemy(Person):
                 self.speed = 60
                 self.defense = 0
                 self.magic_proficiency = 0
-                self.magic = {"Mute": 3}
-                self.items = {"Antidote": 2}   
+                self.magic = {"Mute": 3, "Break": 2, "Protect": 3}
+                self.items = {"Antidote": 2, "Strength": 3}   
                 self.weapon.weapon_type = "Fins"
                 self.weapon.dmg = 40                
                 self.weapon.crit_chance = 60
@@ -404,8 +426,8 @@ class Enemy(Person):
                 self.defense = 0
                 self.speed = 20
                 self.magic_proficiency = 3
-                self.magic = {"Heal": 3, "Fireball": 10, "Stop": 2, "Slow": 2, "Mute": 2}     
-                self.items = {}    
+                self.magic = {"Heal": 6, "Fireball": 10, "Stop": 2, "Slow": 2, "Mute": 2}     
+                self.items = {"Strength": 2, "Weakness": 2}    
                 self.weapon.weapon_type = "Haunting"
                 self.weapon.dmg = 50                
                 self.weapon.crit_chance = 30
@@ -419,7 +441,7 @@ class Enemy(Person):
                 self.speed = 20
                 self.magic_proficiency = 10
                 self.magic = {"Cure": 2, "Heal": 5, "Protect": 10, "Fast": 0, "Instant_Death": 1, "Stop": 2, "Slow": 1, "Mute": 5, "Break": 1}
-                self.items = {"Small_Healing_Potion": 10}
+                self.items = {"Small_Healing_Potion": 10, "Strength": 3, "Weakness": 3}
                 self.weapon.weapon_type = "Staff"
                 self.weapon.dmg = 90                
                 self.weapon.crit_chance = 40
@@ -447,7 +469,7 @@ class Enemy(Person):
                 self.speed = 50
                 self.magic_proficiency = 3
                 self.magic = {"Fireball": 10, "Lightning": 10, "Nuke": 3}     
-                self.items = {}      
+                self.items = {"Mega_Healing_Potion": 2, "Weakness": 10}      
                 self.weapon.weapon_type = "Stomp"
                 self.weapon.dmg = 15               
                 self.weapon.crit_chance = 90
@@ -461,7 +483,7 @@ class Enemy(Person):
                 self.speed = 25
                 self.magic_proficiency = 30
                 self.magic = {"Fireball": 100, "Lightning": 100, "Poison": 100}
-                self.items = {"Antidote": 3, "Small_Healing_Potion":5}             
+                self.items = {"Antidote": 3, "Small_Healing_Potion": 5, "Strength": 2, "Weakness": 3}             
                 self.weapon.weapon_type = "Spirit Swipe"
                 self.weapon.dmg = 15               
                 self.weapon.crit_chance = 90
@@ -572,6 +594,10 @@ class Enemy(Person):
                 attack_items.append("Item Grenade")
             if "Stick" in items_list:
                 attack_items.append("Item Stick")
+            if "Strength" in items_list:
+                attack_items.append("Item Strength")         
+            if "Weakness" in items_list:
+                attack_items.append("Item Weakness")                         
             if "Magic Heal" in heal_options:
                 heal_options.remove("Magic Heal")
             if heal == True and len(heal_options)>0:
@@ -595,6 +621,12 @@ class Enemy(Person):
             if "Stick" in items_list:
                 items_list.remove("Stick")
                 item_attack_options.append("Item Stick")
+            if "Strength" in items_list:
+                items_list.remove("Strength")
+                item_attack_options.append("Item Strength")            
+            if "Weakness" in items_list:
+                items_list.remove("Weakness")
+                item_attack_options.append("Item Weakness")                      
 
             #first selection condition
             if self.muted == True: #use weapon or item (if got here, cannot be paralyzed)
@@ -792,7 +824,7 @@ class Magic:
         """          
         success_val = randint(0,100)
         if success_val <= (caster.magic_proficiency + 65):
-            damage = randint(40,60) - opponent.defense
+            damage = max(0,(randint(40,60) - opponent.defense + caster.base_dmg))
             opponent.health -= damage
             print(f"{opponent.title} lost {damage} health!")            
             success_val = randint(0,100)
@@ -819,11 +851,11 @@ class Magic:
             title_boost = 2
         success_val = randint(0,100)
         if success_val <= (caster.magic_proficiency + 55):
-            opponent_damage = randint(40,60) * title_boost - opponent.defense
+            opponent_damage = max(0,((randint(40,60) + caster.base_dmg) * title_boost - opponent.defense))
             opponent.health -= opponent_damage
             print(f"{opponent.title} lost {opponent_damage} health!")            
             success_val = randint(0,100)
-            if success_val <= (20 - opponent.magic_proficiency+ 100*title_boost):
+            if success_val <= (20 - opponent.magic_proficiency+ 200*title_boost):
                 opponent.status.append(Status("Paralysis",False,duration=2,chance_to_remove=35))
                 print(f"{opponent.title} got afflicted with Paralysis for 2 turns! They wont be able to use weapons til this expires!")
 
@@ -845,17 +877,17 @@ class Magic:
         #high damage, hits caster aswell. Low number of uses
         success_val = randint(0,100)
         if success_val <= (caster.magic_proficiency * 2 + 35):
-            opponet_damage = randint(100,150) - opponent.defense
+            opponet_damage = max(0,((randint(100,150) + caster.base_dmg) - opponent.defense))
             opponent.health -= opponet_damage
             print(f"{opponent.title} lost {opponet_damage} health!")
-            caster_damage = randint(50,100) - caster.defense
+            caster_damage = max(0,((randint(50,100) + caster.base_dmg) - caster.defense))
             caster.health -= caster_damage
             print(f"{caster.title} got hit by the shockwave!")
             print(f"{caster.title} lost {caster_damage} health!")
             return True
         else:
             print(f"{caster.title}'s Nuke missed! How does that even happen?!?")
-            caster.health -= 5
+            caster.health -= 5 + (abs(caster.base_dmg) // 2)
             print(f"{caster.title} lost 5 HP just from the shock of being that bad!")
             return False
 
@@ -902,7 +934,7 @@ class Magic:
             opponent.max_health -= int(opponent.max_health * 0.075)
             if opponent.health > opponent.max_health:
                 opponent.health = opponent.max_health
-            opponent_damage = randint(30,50) - opponent.defense
+            opponent_damage = max(0,((randint(30,50) + caster.base_dmg) - opponent.defense))
             opponent.health -= opponent_damage
             print(f"{opponent.title} lost {old_health-opponent.health} health!")            
             print(f"{opponent.title} got Scarred! They permantly lost 5% of their max health ({old_max} -> {opponent.max_health})")
@@ -1011,6 +1043,27 @@ class Magic:
             print(f"{caster.title}'s Mute spell missed!")
             return False
 
+    def Constrict(self, caster: Person, opponent: Person) -> bool:
+        """Chance to lower opponent's defennse by 30
+
+        Args:
+            caster (Person): Person casting the spell
+            opponent (Person): Person affected by spell
+
+        Returns:
+            bool: If spell succeded or failed
+        """             
+        success_val = randint(0,100)
+        if success_val <= (caster.magic_proficiency + 55):
+            old_def = opponent.defense
+            delta_def = old_def - max(0, opponent.defense-30)
+            opponent.status.append(Status("Constrict", False, chance_to_remove=10))
+            print(f"{opponent.title} got constricted! They lost {delta_def} defense!")
+            return True
+        else:
+            print(f"{caster.title}'s Slow spell missed!")
+            return False
+
 class Items:
     """Item Functions
     """
@@ -1079,6 +1132,26 @@ class Items:
         print(f"{caster.title}'s Antidote cured all negative effects!")
         return True
 
+    def Strength(self, caster: Person) -> bool:
+        """Strength Potion
+
+        Args:
+            caster (Person): Person using item
+
+        Returns:
+            bool: If item succeded or failed
+        """
+        success_val = randint(0,100)
+        if success_val <= 90:
+            caster.status.append(Status("Strength", True, duration=4, chance_to_remove=5))
+            print(f"{caster.title} base dmg rose by {30} for 4 turns!")
+            if success_val <= 10:
+                caster.status.append(Status("Strength", True, duration=2, chance_to_remove=5))
+                print(f"Woah! Strength potion was super effective\n{caster.title} base dmg rose by another {30} for 2 turns!")            
+            return True        
+        print(f"{caster.title}'s Strength Item had no effect!")
+        return False
+
     def Grenade(self, caster: Person, opponent: Person) -> bool:
         """Grenade item, Chance to deal 40-60 dmg
 
@@ -1091,7 +1164,7 @@ class Items:
         """         
         success_val = randint(0,100)
         if success_val <= 90:
-            damage = randint(40,60) - opponent.defense
+            damage = max(0,((randint(40,60) + caster.base_dmg) - opponent.defense))
             opponent.health -= damage
             print(f"{opponent.title} lost {damage} health!")            
             return True
@@ -1116,13 +1189,31 @@ class Items:
         if caster.title == "Toddler":
             title_boost = 30
         if success_val <= 5 + title_boost:
-            damage = randint(140,160) - opponent.defense
+            damage = (randint(140,160) + int(caster.base_dmg * 1.5)) - opponent.defense
             opponent.health -= damage
             print(f".\n..\n...\n{opponent.title} got prodded massively, and lost {damage} health!")            
             return True
         else:
             print(f"{caster.title}'s prodding has slightly annoyed {opponent.title}.")
             return False
+
+    def Weakness(self, caster: Person, opponent: Person) -> bool:
+        """Weakness Potion
+
+        Args:
+            caster (Person): Person using item
+
+        Returns:
+            bool: If item succeded or failed
+        """
+        success_val = randint(0,100)
+        if success_val <= 55:
+            opponent.status.append(Status("Weakness", True, duration=2, chance_to_remove=10))
+            print(f"{opponent.title} base dmg fell by {30} for 2 turns!")         
+            return True      
+        print(f"{caster.title}'s Weakness Item had no effect!")  
+        return False
+
 
 class MainGame:
     """Main game object
@@ -1177,11 +1268,11 @@ class MainGame:
                 if success_val <= caster.weapon.accuracy:
                     success_val = randint(0,100)
                     if success_val <= caster.weapon.crit_chance:
-                        delta_health = randint(int(caster.weapon.dmg * 1.5), int(caster.weapon.dmg * 2)) - opponent.defense
+                        delta_health = max(0,randint(int((caster.weapon.dmg + caster.base_dmg) * 1.5), int((caster.weapon.dmg + caster.base_dmg) * 2)) - opponent.defense)
                         opponent.health -= delta_health
-                        print(f"{opponent.title} lost {delta_health} health!")  
+                        print(f"{caster.title} crit! {opponent.title} lost {delta_health} health!")  
                     else: 
-                        delta_health = randint(int(caster.weapon.dmg * 0.8), int(caster.weapon.dmg * 1.2)) - opponent.defense
+                        delta_health = max(0,randint(int((caster.weapon.dmg + caster.base_dmg) * 0.8), int((caster.weapon.dmg + caster.base_dmg) * 1.2)) - opponent.defense)
                         opponent.health -= delta_health
                         print(f"{opponent.title} lost {delta_health} health!")  
                     attack_success = True
@@ -1223,6 +1314,8 @@ class MainGame:
                         attack_success = magic_class.Break(caster, opponent)
                     case "Scar":
                         attack_success = magic_class.Scar(caster, opponent)
+                    case "Constrict":
+                        attack_success = magic_class.Constrict(caster,opponent)    
                     case _:
                         print("Magic Edge case, this should not happen")
                         print(sub_action)
@@ -1241,10 +1334,14 @@ class MainGame:
                         attack_success = item_class.Mega_Healing_Potion(caster)
                     case "Antidote":
                         attack_success = item_class.Antidote(caster)
+                    case "Strength":
+                        attack_success = item_class.Strength(caster)    
                     case "Grenade":
                         attack_success = item_class.Grenade(caster, opponent)
                     case "Stick":
                         attack_success = item_class.Stick(caster, opponent)
+                    case "Weakness":
+                        attack_success = item_class.Weakness(caster, opponent)
                     case _:
                         print("Item Edge case, this should not happen")
                         print(sub_action)
@@ -1331,6 +1428,10 @@ class MainGame:
                         max_percent = min(100, 2*self.player.magic_proficiency+30)
                         print(f"---Scar Spell---\nChance to succeed: 30% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
                         print(f"Description: Opponent permantly loses 7.5% of their Max HP and deals 30-50 dmg\n---Scar Spell---")
+                    case "Constrict":
+                        max_percent = min(100, self.player.magic_proficiency+55)                        
+                        print(f"---Constrict Spell---\nChance to succeed: 55% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
+                        print(f"Description: Opponent loses 30 defense for 3 turns\n---Constrict Spell---")                        
                     case _:
                         print("Magic DESCRIPTION edge case, this should not happen")
                         print(main_selection,sub_selection)
@@ -1352,6 +1453,9 @@ class MainGame:
                     case "Antidote":
                         print(f"---Antidote Item---\nChance to succeed: 100%")
                         print(f"Description: Cures all negative status effects\n---Antidote Item---")
+                    case "Strength":
+                        print(f"---Strength Item---\nChance to succeed: 90%")
+                        print(f"Description: Adds 30 base damage to all sources\n---Strength Item---")                        
                     case "Grenade":
                         print(f"---Grenade Item---\nChance to succeed: 90%")
                         print(f"Description: Deals between 40-60 dmg, minus enemy defense\n---Grenade Item---")
@@ -1359,6 +1463,9 @@ class MainGame:
                         print(f"---Stick Item---\nChance to succeed: 5%")
                         print(f"Description: Deals between [obfuscated] dmg, minus enemy defense")
                         print(f"Extra Effects: Has a 100% chance to annoy your enemy (enemy's dmg goes up by 2)\n---Stick Item---")
+                    case "Weakness":
+                        print(f"---Weakness Item---\nChance to succeed: 55%")
+                        print(f"Description: Lowers opponent's base damage to all sources by 30\n---Weakness Item---")                     
                     case _:
                         print("Item DESCRIPTION Edge case, this should not happen")
                         print(main_selection, sub_selection)
@@ -1758,8 +1865,16 @@ class MainGame:
             enemy_cur_health = self.enemy.health
             print(f"\n\n    Turn {turn}:\n---------------")
             sleep_func(1)
-            print(f"{self.player.title}: {self.player.health}/{self.player.max_health}HP, {self.player.speed} Speed")
-            print(f"{self.enemy.title}: {self.enemy.health}/{self.enemy.max_health}HP, {self.enemy.speed} Speed")            
+            print(f"{self.player.title}: {self.player.health}/{self.player.max_health}HP, {self.player.speed} Speed", end="")
+            if self.player.base_dmg != 0:
+                print(f", dmg modifer: {self.player.base_dmg}")
+            else:
+                print()
+            print(f"{self.enemy.title}: {self.enemy.health}/{self.enemy.max_health}HP, {self.enemy.speed} Speed", end="")    
+            if self.enemy.base_dmg != 0:
+                print(f", dmg modifer: {self.enemy.base_dmg}")  
+            else:
+                print()                  
             sleep_func(2)
             #get turn order
             first_player = ""
@@ -1773,15 +1888,15 @@ class MainGame:
             #do actions
             if first_player == "Player":
                 #1st attack                   
-                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")         
-                #edit choices for round 
-                self.player.remove_status_effects()                 
-                player_choice = self.user_action_select()
+                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                         
+                player_choice = self.user_action_select()               
                 print()
                 sleep_func(1)         
                 self.action(self.player, self.enemy, player_choice)
                 sleep_func(1)
-                #apply status effects -> check for winner
+                #edit choices for next round                 
+                self.player.remove_status_effects()      
+                #apply status effects -> check for winner                            
                 self.enemy.apply_status_effects()                                  
                 if self.enemy.health <= 0:
                     print(f"{self.enemy.title} died!")
@@ -1797,13 +1912,13 @@ class MainGame:
 
                 sleep_func(2)
                 #2nd attack               
-                print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")
-                #edit choices for round  
-                self.enemy.remove_status_effects()             
-                ai_choice = self.enemy.ai_action()                         
+                print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")           
+                ai_choice = self.enemy.ai_action()                                                       
                 sleep_func(1.5)             
                 self.action(self.enemy, self.player, ai_choice)
                 sleep_func(1)
+                #edit choices for next round                 
+                self.enemy.remove_status_effects()                   
                 #apply status effects -> check for winner
                 self.player.apply_status_effects() 
                 if self.player.health <= 0:
@@ -1818,13 +1933,13 @@ class MainGame:
                 print("-_-_-_-_-_-_-_-_-_-\n")                 
             elif first_player == "Enemy":
                 #1st attack           
-                print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")    
-                #edit choices for round                     
-                self.enemy.remove_status_effects()                          
-                ai_choice = self.enemy.ai_action()             
+                print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                            
+                ai_choice = self.enemy.ai_action()   
                 sleep_func(1.5)     
                 self.action(self.enemy, self.player, ai_choice)
                 sleep_func(1)
+                #edit choices for next round                 
+                self.enemy.remove_status_effects()                    
                 #apply status effects -> check for winner
                 self.player.apply_status_effects() 
                 if self.player.health <= 0:
@@ -1840,14 +1955,14 @@ class MainGame:
                 sleep_func(2)
 
                 #2nd attack
-                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")
-                #edit choices for round 
-                self.player.remove_status_effects()                                                              
-                player_choice = self.user_action_select() 
+                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                                                            
+                player_choice = self.user_action_select()               
                 print() 
                 sleep_func(1.5)                                               
                 self.action(self.player, self.enemy, player_choice)
                 sleep_func(1)
+                #edit choices for next round                 
+                self.player.remove_status_effects()                 
                 #apply status effects -> check for winner
                 self.enemy.apply_status_effects() 
                 if self.enemy.health <= 0:
