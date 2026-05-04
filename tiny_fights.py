@@ -57,40 +57,31 @@ class Weapon:
                 self.dmg = 30    
                 self.accuracy = 90
                 self.crit_chance = 10
-        
             case "Spear":
                 self.weapon_type = "Spear"
                 self.dmg = 40    
                 self.accuracy = 80
                 self.crit_chance = 20
-        
-
             case "Axe":
                 self.weapon_type = "Axe"
                 self.dmg = 50    
                 self.accuracy = 80
                 self.crit_chance = 30
-        
-
             case "Tome":
                 self.weapon_type = "Tome"
                 self.dmg = 30    
                 self.accuracy = 50
                 self.crit_chance = 50
-        
-
             case "Spatula":
                 self.weapon_type = "Spatula"
                 self.dmg = 35   
                 self.accuracy = 85
                 self.crit_chance = 10
-        
             case "Blankie":
                 self.weapon_type = "Blankie"
                 self.dmg = 10    
                 self.accuracy = 100
                 self.crit_chance = 1
-
             case _: 
                 self.weapon_type = "Fists"
                 self.dmg = 20    
@@ -199,13 +190,13 @@ class Person:
                     self.status.remove(value)
                     print(f"{self.title}'s <{value.status_name}> Expired randomly")
                 else:
-                    print(f"{self.title} has <{value.status_name}> for {value.duration} more turns")
+                    print(f"{self.title} has <{value.status_name}> for {value.duration} more turn(s)")
     
     def __repr__(self):
         return str(self)
 
     def __str__(self):
-        return f"{self.title}-- Health Points: {self.health}/{self.max_health}, Defense: {self.defense}, Speed: {self.speed}, Magic Proficiency: {self.magic_proficiency}, Weapon: {self.weapon.weapon_type}"
+        return f"-{self.title}-\nHealth Points: {self.health}/{self.max_health}\nDefense: {self.defense}\nSpeed: {self.speed}\nMagic Proficiency: {self.magic_proficiency}\nWeapon: {self.weapon.weapon_type}"
 
 class Player(Person):
     """Player Class, subclass of Person
@@ -485,6 +476,13 @@ class Enemy(Person):
         action_choice = ""
         has_negative_status = False
         heal = False
+        heal_options = []
+        if "Heal" in list(self.magic.keys()):
+            heal_options.append("Magic Heal")
+        if "Mega_Healing_Potion" in list(self.items.keys()):
+            heal_options.append("Item Mega_Healing_Potion")
+        if "Small_Healing_Potion" in list(self.items.keys()):
+            heal_options.append("Item Small_Healing_Potion")        
 
         for i in range(len(self.status)):
             if self.status[i].isgood == False:
@@ -501,12 +499,30 @@ class Enemy(Person):
                 heal = True
             elif (self.health <= int(0.25 * self.max_health)) and has_negative_status:
                 attack = False
-                if "Antidote" in self.items.keys():
-                    action_choice = "Item Antidote"
-                    return action_choice
-                elif ("Cure" in self.magic.keys()) and (self.muted == False):
-                    action_choice = "Magic Cure"
-                    return action_choice
+                cure_options = []
+                if "Antidote" in list(self.items.keys()):
+                    cure_options.append("Item Antidote")
+                if ("Cure" in list(self.magic.keys())) and (self.muted == False):
+                    cure_options.append("Magic Cure")
+                cure_options_len = len(cure_options)
+                if cure_options_len>0:
+                    if cure_options_len == 1:
+                        action_choice = cure_options[0]
+                        return action_choice
+                    #if len = 2, magic will always be in it
+                    rand_val = randint(0,100)
+                    if self.ai_type[1] == "Magic" and rand_val > 20:
+                        action_choice = "Magic Cure"
+                        return action_choice
+                    elif self.ai_type[1] == "Magic" and rand_val > 20:
+                        action_choice = "Magic Cure"
+                        return action_choice
+                    elif self.ai_type[1] == "Magic" and rand_val > 20:
+                        action_choice = "Magic Cure"
+                        return action_choice     
+                    else:
+                        action_choice = "Item Antidote"
+                        return action_choice                                          
             else:
                 attack_val = randint(0,100)
                 if 80 > attack_val:
@@ -514,17 +530,35 @@ class Enemy(Person):
         elif self.ai_type[0] == "Cautious": #more focused on item usage
             if self.health >= int(0.8 * self.max_health):
                 attack = True
-            elif self.health <= int(0.2 * self.max_health):
+            elif self.health <= int(0.3 * self.max_health):
                 attack = False
                 heal = True
             elif (self.health <= int(0.5 * self.max_health)) and has_negative_status:
                 attack = False                
-                if ("Cure" in self.magic.keys()) and (self.muted == False):
-                    action_choice = "Magic Cure"
-                    return action_choice          
-                elif "Antidote" in self.items.keys():
-                    action_choice = "Item Antidote"
-                    return action_choice
+                cure_options = []
+                if "Antidote" in list(self.items.keys()):
+                    cure_options.append("Item Antidote")
+                if ("Cure" in list(self.magic.keys())) and (self.muted == False):
+                    cure_options.append("Magic Cure")
+                cure_options_len = len(cure_options)
+                if cure_options_len>0:
+                    if cure_options_len == 1:
+                        action_choice = cure_options[0]
+                        return action_choice
+                    #if len = 2, magic will always be in it
+                    rand_val = randint(0,100)
+                    if self.ai_type[1] == "Magic" and rand_val > 20:
+                        action_choice = "Magic Cure"
+                        return action_choice
+                    elif self.ai_type[1] == "Magic" and rand_val > 20:
+                        action_choice = "Magic Cure"
+                        return action_choice
+                    elif self.ai_type[1] == "Magic" and rand_val > 20:
+                        action_choice = "Magic Cure"
+                        return action_choice     
+                    else:
+                        action_choice = "Item Antidote"
+                        return action_choice                            
             else:
                 attack_val = randint(0,100)
                 if 50 > attack_val:
@@ -532,52 +566,111 @@ class Enemy(Person):
         else:
             print("should not happen. ai_type needs to be Cautious or Agressive")
             exit_game()                   
-        if (self.muted == True) and (self.paralyzed == True):
-            attack == False
+
+        #attack should be set now
+        if (self.muted == True) and (self.paralyzed == True): #can only use items
             if len(self.items.items()) == 0:
                 action_choice = "Continue"
                 return action_choice
-        #attack should be set now
+            attack_items = []
+            items_list = list(self.items.keys())
+            if "Grenade" in items_list:
+                attack_items.append("Item Grenade")
+            if "Stick" in items_list:
+                attack_items.append("Item Stick")
+            if "Magic Heal" in heal_options:
+                heal_options.remove("Magic Heal")
+            if heal == True and len(heal_options)>0:
+                action_choice = choice(heal_options)
+            elif attack == True and len(attack_items)>0:
+                action_choice = choice(attack_items)
+            else:
+                action_choice = "Item " + choice(items_list)
+            return action_choice
+
         if attack == True:
             rand_val = randint(0,100)
             magic_list = list(self.magic.keys())
+            items_list = list(self.items.keys())
+            item_attack_options = []
             if "Heal" in magic_list:
                 magic_list.remove("Heal")
             if "Cure" in magic_list:
                 magic_list.remove("Cure")
+            if "Grenade" in items_list:
+                items_list.remove("Grenade")
+                item_attack_options.append("Item Grenade")
+            if "Stick" in items_list:
+                items_list.remove("Stick")
+                item_attack_options.append("Item Stick")
 
-            if self.muted == True:
-                action_choice = "Weapon"
-            elif (self.ai_type[1] == "Magic") and (len(magic_list)>0) and rand_val>20:
-                action_choice = "Magic " + choice(magic_list)
-            elif (self.ai_type[1] == "Mixed") and (len(magic_list)>0) and rand_val>50:
-                action_choice = "Magic " + choice(magic_list)
-            elif (self.ai_type[1] == "Weapon") and (len(magic_list)>0) and rand_val>80:
-                action_choice = "Magic " + choice(magic_list)
-            elif self.paralyzed == True:
-                if len(magic_list)>0:
-                    action_choice = "Magic" + choice(magic_list)
+            #first selection condition
+            if self.muted == True: #use weapon or item (if got here, cannot be paralyzed)
+                if len(item_attack_options) == 0:
+                    action_choice = "Weapon"
+                elif self.ai_type[0] == "Agressive":
+                    rand_val = randint(0,100)
+                    if rand_val > 40:
+                        action_choice = "Weapon"
+                    else:
+                        action_choice = choice(item_attack_options)
                 else:
-                    action_choice = "Continue"
+                    rand_val = randint(0,100)
+                    if rand_val > 60:
+                        action_choice = "Weapon"
+                    else:
+                        action_choice = choice(item_attack_options)                  
+
+            elif len(magic_list)>0: #checks magic options first
+                if (self.ai_type[1] == "Magic") and rand_val>20:
+                    action_choice = "Magic " + choice(magic_list)
+                elif (self.ai_type[1] == "Mixed") and rand_val>50:
+                    action_choice = "Magic " + choice(magic_list)
+                elif (self.ai_type[1] == "Weapon") and rand_val>80:
+                    action_choice = "Magic " + choice(magic_list)
+                elif self.paralyzed == True: #can still use items and magic (cannot be muted if got here)
+                    if len(item_attack_options) == 0:
+                        action_choice = "Magic " + choice(magic_list)
+                    else:
+                        action_choice = choice(item_attack_options)
+                else: #selects weapon, or item
+                    if len(item_attack_options) == 0:
+                        action_choice = "Weapon"
+                    elif self.ai_type[0] == "Agressive":
+                        rand_val = randint(0,100)
+                        if rand_val > 40:
+                            action_choice = "Weapon"
+                        else:
+                            action_choice = choice(item_attack_options)
+                    else:
+                        rand_val = randint(0,100)
+                        if rand_val > 60:
+                            action_choice = "Weapon"
+                        else:
+                            action_choice = choice(item_attack_options) 
             else:
                 action_choice = "Weapon"
         else:
-            heal_options = []
-            if "Heal" in self.magic.keys():
-                if self.magic["Heal"] > 0:
-                    heal_options.append("Magic Heal")
-            if "Mega_Healing_Potion" in self.items.keys():
-                if self.items["Mega_Healing_Potion"] > 0:
-                    heal_options.append("Item Mega_Healing_Potion")
-            if "Small_Healing_Potion" in self.items.keys():
-                if self.items["Small_Healing_Potion"] > 0:
-                    heal_options.append("Item Small_Healing_Potion")
-            
             if (len(heal_options) > 0) and (heal == True):
-                if (self.ai_type[1] == "Magic") and (heal_options == "HealMagic") and (self.muted == False):
-                    action_choice = "Magic Heal"
+                if self.muted == False:
+                    if (self.ai_type[1] == "Magic") and ("Magic Heal" in heal_options):
+                        action_choice = "Magic Heal"
+                    else:
+                        action_choice = choice(heal_options)
                 else:
-                    action_choice = choice(heal_options)
+                    if "Magic Heal" in heal_options:
+                        heal_options.remove("Magic Heal")
+                    if len(heal_options)>0:
+                        action_choice = choice(heal_options)
+                    else:
+                        items_list = list(self.items.keys())                    
+                        if "Antidote" in items_list:
+                            items_list.remove("Antidote")                    
+                        if len(items_list)>0:
+                            action_choice = "Item " + choice(items_list)
+                        else:
+                            action_choice = "Weapon"
+
             else:
                 items_list = list(self.items.keys())
                 if "Mega_Healing_Potion" in items_list:
@@ -855,8 +948,8 @@ class Magic:
             bool: If spell succeded or failed
         """             
         success_val = randint(0,100)
-        max_chance = min(caster.magic_proficiency * 2, 20)
-        if success_val <= (max_chance + 5):
+        max_chance = min(caster.magic_proficiency * 2 + 5, 20)
+        if success_val <= max_chance:
             opponent.health = -100
             print(f"{opponent.title} Died")
             return True
@@ -1049,7 +1142,7 @@ class MainGame:
         self.endless = False
         self.menu_screen()
 
-    def action_select(self, caster: Person, opponent: Person, action: str) -> bool:
+    def action(self, caster: Person, opponent: Person, action: str) -> bool:
         """Does the action the caster selected
 
         Args:
@@ -1170,7 +1263,7 @@ class MainGame:
                 exit_game()
 
     def selection_descriptions(self, main_selection: str, sub_selection: str) -> None:   
-        """Gets descritions for the selected action
+        """Gets and prints descritions for the selected action
 
         Args:
             main_selection (str): Main selection, either Attack, Magic, or Item
@@ -1219,7 +1312,7 @@ class MainGame:
                         print(f"---Poison Spell---\nChance to succeed: 70% + {self.player.magic_proficiency} magic profficiency = {max_percent}%")
                         print(f"Description: Afflicts enemy with Poison for 6 turns, causing them to lose 5% of their max hp per turn\n---Poison Spell---")
                     case "Instant_Death":
-                        max_percent = min(2*self.player.magic_proficiency, 20) + 5
+                        max_percent = min(2*self.player.magic_proficiency + 5, 20)
                         print(f"---Instant_Death Spell---\nChance to succeed (max of 20%): 5% + 2*{self.player.magic_proficiency} magic profficiency = {max_percent}%")
                         print(f"Description: Instantly kills opponent\n---Instant_Death Spell---")
                     case "Stop":
@@ -1329,6 +1422,7 @@ class MainGame:
                     for idx, string in enumerate(main_user_options):
                         print(idx+1, "| " + string)
                     user_input = input(f"Pick the option corresponding to the numbers: {main_print_str_nums}\n-> ")
+                    print()
                     if not(user_input.isnumeric()):
                         raise ValueError
                     elif user_input not in main_acceptable_input_nums:
@@ -1343,6 +1437,7 @@ class MainGame:
 
             if option_chose == "Exit Game":
                 user_input = input("Do really want to exit? Your progress will be lost 'Y'/'N'\n-> ").upper()
+                print()
                 if "Y" in user_input:
                     exit_game()
             elif option_chose == "Continue":
@@ -1351,6 +1446,7 @@ class MainGame:
                 while True:
                     self.selection_descriptions(option_chose, "")                             
                     user_input = input("Type 'Y' to confirm you want to attack, or 'B' or 'N' to go back\n-> ").upper()
+                    print()
                     if ("N" in user_input) or ("B" in user_input):
                         break
                     elif "Y" in user_input:
@@ -1373,6 +1469,7 @@ class MainGame:
                 while True:
                     try:
                         user_input = input(f"Pick the option corresponding to the numbers, or 'back' to go back: {print_str_nums}\n-> ").upper()
+                        print()
                         if "B" in user_input:
                             break
                         elif not(user_input.isnumeric()):
@@ -1382,7 +1479,9 @@ class MainGame:
                         else:
                             while True:
                                 temp_chosen = list(user_options.keys())[int(user_input)-1]    
-                                self.selection_descriptions(option_chose, temp_chosen)                                
+                                print()
+                                self.selection_descriptions(option_chose, temp_chosen)
+                                print()                               
                                 user_input = input(f"Type 'Y' to confirm you want to use <{temp_chosen}>, or 'B' or 'N' to go back\n-> ").upper()
                                 if ("N" in user_input) or ("B" in user_input):
                                     break
@@ -1410,6 +1509,7 @@ class MainGame:
                 while True:
                     try:
                         user_input = input(f"Pick the option corresponding to the numbers, or 'back' to go back: {print_str_nums}\n-> ").upper()
+                        print()
                         if "B" in user_input:
                             break
                         elif not(user_input.isnumeric()):
@@ -1419,7 +1519,9 @@ class MainGame:
                         else:
                             while True:
                                 temp_chosen = list(user_options.keys())[int(user_input)-1]
-                                self.selection_descriptions(option_chose, temp_chosen)                                         
+                                print()
+                                self.selection_descriptions(option_chose, temp_chosen)   
+                                print()                                      
                                 user_input = input(f"Type 'Y' to confirm you want to use <{temp_chosen}>, or 'B' or 'N' to go back\n-> ").upper()
                                 if ("N" in user_input) or ("B" in user_input):
                                     break
@@ -1533,7 +1635,7 @@ class MainGame:
         """
         character = self.character.upper()
         weapon_list = []
-        print("\n\n\n\n\n\n")
+        print("\n\n\n")
         print_statement = ""
         match character:
             case "WIZARD":
@@ -1636,10 +1738,16 @@ class MainGame:
             self.player: Player = Player(self.character, self.weapon)
             del self.character
             del self.weapon
+        print("\nYour Player is...")
+        print("----------------------")
         print(self.player)
+        print("----------------------")
         self.enemy = Enemy()
         print("\nYour opponent is...")
+        print("----------------------")
         print(self.enemy)
+        print("----------------------\n\n")     
+        print("\n_-‾-_-‾-_-‾-_-‾-_\nStarting game...\n‾-_-‾-_-‾-_-‾-_-‾\n")
         self.game()
  
     def game(self) -> None:
@@ -1649,7 +1757,7 @@ class MainGame:
         turn = 0
         while ending_type == 0:
             turn += 1
-            print(f"Turn {turn}:\n---------------")
+            print(f"\n\n    Turn {turn}:\n---------------")
             #get turn order
             first_player = ""
             if self.player.speed < self.enemy.speed:
@@ -1659,59 +1767,74 @@ class MainGame:
             else:
                 first_player = "Player"
             #do actions
+
             if first_player == "Player":
                 #1st attack
+                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                
                 player_choice = self.user_action_select()
-                #edit choices for next round
-                self.player.remove_status_effects()                                
-                self.action_select(self.player, self.enemy, player_choice)
+                print()
+                #edit choices for next round                             
+                self.action(self.player, self.enemy, player_choice)
+                self.player.remove_status_effects()                   
                 #effects -> check for winner
                 self.enemy.apply_status_effects()
-                print(f"{self.enemy.title} has {self.enemy.health} HP remaining")                
                 if self.enemy.health <= 0:
+                    print(f"{self.enemy.title} died!")
                     ending_type = 1
                     if self.player.health <= 0:
                         ending_type = 3
+                    break                
+                print(f"{self.enemy.title} has {self.enemy.health}/{self.enemy.max_health} HP remaining")                
+                print("-_-_-_-_-_-_-_-_-_-")
 
                 #2nd attack
+                print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")
                 ai_choice = self.enemy.ai_action() 
-                #edit choices for next round                  
-                self.enemy.remove_status_effects()                             
-                self.action_select(self.enemy, self.player, ai_choice)
+                #edit choices for next round                                            
+                self.action(self.enemy, self.player, ai_choice)
+                self.enemy.remove_status_effects()                   
                 #effects -> check for winner
                 self.player.apply_status_effects()
-                print(f"{self.player.title} has {self.player.health} HP remaining")                   
                 if self.player.health <= 0:
                     ending_type = 2          
                     if self.enemy.health <= 0:
-                        ending_type = 3                           
+                        ending_type = 3         
+                    break                
+                print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                   
+                print("-_-_-_-_-_-_-_-_-_-\n")                 
             elif first_player == "Enemy":
+                print(f"\n\n{self.enemy.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                
                 ai_choice = self.enemy.ai_action()
                 #edit choices for next round                   
-                self.enemy.remove_status_effects()                             
-                self.action_select(self.enemy, self.player, ai_choice)
+                self.action(self.enemy, self.player, ai_choice)
+                self.enemy.remove_status_effects()                  
                 #effects -> check for winner
                 self.player.apply_status_effects()
-                print(f"{self.player.title} has {self.player.health} HP remaining")                   
                 if self.player.health <= 0:
                     ending_type = 2   
                     if self.enemy.health <= 0:
-                        ending_type = 3                                             
+                        ending_type = 3       
+                    break                
+                print(f"{self.player.title} has {self.player.health}/{self.player.max_health} HP remaining")                   
+                print("-_-_-_-_-_-_-_-_-_-\n")                                       
                      
                 #2nd attack
-                player_choice = self.user_action_select()  
-                #edit choices for next round                  
-                self.player.remove_status_effects()                                
-                self.action_select(self.player, self.enemy, player_choice)
+                print(f"\n\n{self.player.title}'s Turn:\n-‾-‾-‾-‾-‾-‾-‾-‾-‾-")                 
+                player_choice = self.user_action_select() 
+                print() 
+                #edit choices for next round                                                 
+                self.action(self.player, self.enemy, player_choice)
+                self.player.remove_status_effects()                 
                 #effects -> check for winner
                 self.enemy.apply_status_effects()
-                print(f"{self.enemy.title} has {self.enemy.health} HP remaining")                
                 if self.enemy.health <= 0:
                     ending_type = 1     
                     if self.player.health <= 0:
-                        ending_type = 3                                
-                       
-
+                        ending_type = 3
+                    break                
+                print(f"{self.enemy.title} has {self.enemy.health}/{self.enemy.max_health} HP remaining")                
+                print("-_-_-_-_-_-_-_-_-_-\n")                       
+        
         self.ending(ending_type)
 
     def ending(self, endings: int) -> None:
@@ -1725,7 +1848,7 @@ class MainGame:
                 print("You Won !!")
                 if self.endless == True:
                     self.enemies_killed += 1
-                    print(f"{self.enemies_killed} killed")                    
+                    print(f"{self.enemies_killed} Enimies killed")                    
                     self.start_game()
             case 2:
                 print("You lost! ;c")
@@ -1743,13 +1866,12 @@ class MainGame:
             if "Y" in user_input:
                 self.enemies_killed += 1
                 self.endless = True
-                print(self.player)
-                print(f"{self.enemies_killed} killed")
+                print(f"{self.enemies_killed} Enemy killed")
                 self.start_game()
             else:
                 exit_game(noexit=True)
 
-def exit_game(self, noexit=False) -> NoReturn:
+def exit_game(noexit=False) -> NoReturn:
     """Exit game function
 
     Args:
